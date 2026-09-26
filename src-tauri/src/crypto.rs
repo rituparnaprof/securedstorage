@@ -7,7 +7,7 @@ use aes_gcm::{
 use argon2::{Algorithm, Argon2, Params, Version};
 use rand::{rngs::OsRng, RngCore};
 use subtle::ConstantTimeEq;
-use zeroize::{Zeroize, Zeroizing};
+use zeroize::Zeroizing;
 
 pub const MAGIC_BYTES: &[u8; 4] = b"PQC1";
 pub const CURRENT_VERSION: u16 = 1;

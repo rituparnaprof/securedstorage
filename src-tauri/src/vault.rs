@@ -10,7 +10,7 @@ use zeroize::{Zeroize, Zeroizing};
 
 use crate::crypto::{
     create_key_slot, decrypt_aes_gcm, encrypt_aes_gcm, generate_random_bytes, generate_random_mek,
-    unlock_key_slot, KeySlot, VaultContainer, CURRENT_VERSION, KEY_LEN, MAGIC_BYTES, NONCE_LEN,
+    unlock_key_slot, VaultContainer, CURRENT_VERSION, KEY_LEN, MAGIC_BYTES, NONCE_LEN,
 };
 use crate::security::{lock_memory, unlock_memory};
 

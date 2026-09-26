@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.1] - 2026-09-26
+
+### Fixed
+- **Windows Build**: Generated `icons/icon.ico` required for Windows resource compiler (`rc.exe`) during Tauri binary generation.
+- **macOS Bundler**: Removed built-in system framework `LocalAuthentication` from `bundle.macOS.frameworks` array (system frameworks are dynamically linked by the kernel, not bundled as third-party files).
+- **macOS Icons**: Generated Apple standard multi-resolution `icons/icon.icns` bundle.
+- **Compiler Warnings**: Cleaned up unused imports and target guards across `src/crypto.rs`, `src/security.rs`, `src/lib.rs`, and `src/vault.rs`.
+- **CI Artifact Upload**: Added paths for `.app` and `.rpm` bundles in GitHub Actions workflow.
+
 ---
 
 ## [1.0.0] - 2026-09-26

@@ -5,6 +5,7 @@ extern "C" {
     fn ptrace(request: libc::c_int, pid: libc::pid_t, addr: *const libc::c_char, data: libc::c_int) -> libc::c_int;
 }
 
+#[cfg(target_os = "macos")]
 const PT_DENY_ATTACH: libc::c_int = 31;
 
 /// Apply kernel-level anti-debugging and process dumping defenses
@@ -42,13 +43,12 @@ pub fn apply_process_hardening() {
 }
 
 /// Prevent OS window from being captured in screenshots, screen shares, or recordings
-pub fn apply_window_capture_protection(window: &tauri::WebviewWindow) {
+pub fn apply_window_capture_protection(_window: &tauri::WebviewWindow) {
     #[cfg(target_os = "macos")]
     {
         // On macOS, set NSWindow.sharingType = NSWindowSharingNone (0)
         // This causes the window to render completely transparent/black in all screen captures and screen shares
-        use tauri::Manager;
-        if let Ok(ns_window_ptr) = window.ns_window() {
+        if let Ok(ns_window_ptr) = _window.ns_window() {
             let ns_window = ns_window_ptr as *mut std::ffi::c_void;
             if !ns_window.is_null() {
                 unsafe {
@@ -67,7 +67,7 @@ pub fn apply_window_capture_protection(window: &tauri::WebviewWindow) {
     #[cfg(windows)]
     {
         // On Windows, set SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)
-        if let Ok(hwnd) = window.hwnd() {
+        if let Ok(hwnd) = _window.hwnd() {
             unsafe {
                 use windows_sys::Win32::UI::WindowsAndMessaging::SetWindowDisplayAffinity;
                 const WDA_EXCLUDEFROMCAPTURE: u32 = 0x00000011;

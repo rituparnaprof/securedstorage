@@ -4,7 +4,7 @@ pub mod crypto;
 pub mod security;
 pub mod vault;
 
-use tauri::{AppHandle, Manager, State};
+use tauri::{Manager, State};
 use vault::{
     add_new_entry, delete_entry_by_id, initialize_new_vault, reveal_entry_field,
     unlock_with_biometric_and_pin, unlock_with_password, vault_file_exists, MaskedCredentialEntry,
