@@ -18,13 +18,11 @@
         <span class="pqc-tag">PQC-Compliant • Zero-Cloud • Hardware-Bound</span>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 14px;">
-      <select id="themeSelect" class="theme-selector" title="Theme (Dark, Glass, Tint, Light)">
-        <option value="dark">🌑 Dark</option>
-        <option value="glass">🔮 Glass</option>
-        <option value="tint">💎 Tint</option>
-        <option value="light">☀️ Light</option>
-      </select>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button id="themeToggleBtn" class="btn-theme-toggle" title="Switch between Light and Dark mode">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText">Light Mode</span>
+      </button>
       <div id="headerActions" class="header-actions hidden">
         <button id="addEntryBtn" class="btn btn-primary">+ Add Credential</button>
         <button id="lockVaultBtn" class="btn btn-danger">🔒 Lock Vault</button>

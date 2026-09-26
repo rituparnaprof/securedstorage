@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.3] - 2026-09-26
+
+### Added
+- **One-Click Light / Dark Mode Toggle**:
+  - Added dedicated header toggle button switching instantly between high-contrast daylight (Light) and deep midnight (Dark) modes.
+  - Automatic detection and synchronization with system OS preference (`prefers-color-scheme`).
+  - Persistent user preference saved in local storage.
+
+---
+
 ## [1.0.2] - 2026-09-26
 
 ### Added

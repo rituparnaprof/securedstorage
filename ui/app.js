@@ -129,19 +129,36 @@ const modalPass = document.getElementById('modalPass');
 const modalNotes = document.getElementById('modalNotes');
 const modalError = document.getElementById('modalError');
 const lockVaultBtn = document.getElementById('lockVaultBtn');
-const themeSelect = document.getElementById('themeSelect');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const themeIcon = document.getElementById('themeIcon');
+const themeText = document.getElementById('themeText');
 
-// Theme Management: Dark, Light, Tint, Glass
+// Theme Management: Light / Dark Mode with System Preference Fallback
 function setupTheme() {
-  const saved = localStorage.getItem('ss_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  if (themeSelect) {
-    themeSelect.value = saved;
-    themeSelect.addEventListener('change', (e) => {
-      const theme = e.target.value;
-      document.documentElement.setAttribute('data-theme', theme);
-      try { localStorage.setItem('ss_theme', theme); } catch(err) {}
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  let currentTheme = localStorage.getItem('ss_theme') || (prefersLight ? 'light' : 'dark');
+  
+  applyTheme(currentTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      applyTheme(currentTheme);
+      try { localStorage.setItem('ss_theme', currentTheme); } catch(err) {}
     });
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (themeIcon && themeText) {
+    if (theme === 'light') {
+      themeIcon.textContent = '🌙';
+      themeText.textContent = 'Dark Mode';
+    } else {
+      themeIcon.textContent = '☀️';
+      themeText.textContent = 'Light Mode';
+    }
   }
 }
 
