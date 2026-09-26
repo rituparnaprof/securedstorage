@@ -39,23 +39,34 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Tauri IPC wrapper with fallback detection for latest Tauri v2
-const tauriInvoke = (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === 'function')
-  ? window.__TAURI__.core.invoke
-  : (window.__TAURI__ && typeof window.__TAURI__.invoke === 'function')
-    ? window.__TAURI__.invoke
-    : null;
-
-async function invokeCommand(command, args = {}) {
-  if (typeof tauriInvoke === 'function') {
-    return await tauriInvoke(command, args);
+// Tauri IPC wrapper with dynamic resolution for Tauri v2
+function getTauriInvoke() {
+  if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === 'function') {
+    return window.__TAURI__.core.invoke;
   }
-  // If running in development browser preview without Tauri backend
-  console.warn(`[SecuredStorage] Running in standalone webview preview for: ${command}`);
-  return mockBackendHandler(command, args);
+  if (window.__TAURI__ && typeof window.__TAURI__.invoke === 'function') {
+    return window.__TAURI__.invoke;
+  }
+  return null;
 }
 
-// In-Memory Dev Mock (Allows testing UI in standard browser preview if needed)
+async function invokeCommand(command, args = {}) {
+  const invoke = getTauriInvoke();
+  if (typeof invoke === 'function') {
+    return await invoke(command, args);
+  }
+  
+  // Standalone browser dev preview fallback only when accessed via standard http server
+  if (window.location.protocol === 'http:' && window.location.hostname !== 'tauri.localhost') {
+    console.warn(`[SecuredStorage] Running in browser preview for: ${command}`);
+    return mockBackendHandler(command, args);
+  }
+
+  console.error(`[SecuredStorage] Tauri IPC bridge unavailable for command: ${command}`);
+  throw new Error(`Native secure backend connection unavailable (window.__TAURI__ not initialized).`);
+}
+
+// In-Memory Dev Mock (Allows testing UI layout in standard browser preview if needed)
 let mockVaultCreated = false;
 let mockEntries = [];
 async function mockBackendHandler(command, args) {
@@ -66,6 +77,8 @@ async function mockBackendHandler(command, args) {
     return "SEC-9F2A-8C31-E04D-2B5C-681E-A9F0-713B-4D8E";
   }
   if (command === 'trigger_biometric_scan') {
+    // In mock browser preview, simulate user scanning biometrics
+    await new Promise(r => setTimeout(r, 1500));
     return true;
   }
   if (command === 'recover_vault') {

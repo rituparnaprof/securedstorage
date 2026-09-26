@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Renamed `Website` to **`Site`** with clear plain-text guidance (e.g., Google, Banking, AWS, Work Email) rather than requiring full URL syntax.
   - Adjusted vault table column widths to 5 cleanly aligned columns (`Site`, `Username`, `Password`, `Notes`, `Actions`).
 
+### Fixed
+- **Native Biometric IPC Resolution & Zero Touch ID Reuse**:
+  - Configured `"withGlobalTauri": true` in `tauri.conf.json`, ensuring `window.__TAURI__.core.invoke` is reliably injected into the webview rather than silently falling back to mock handlers.
+  - Enforced `context.touchIDAuthenticationAllowableReuseDuration = 0.0` in `touchid_macos.m` so macOS strictly prompts for a physical biometric sensor touch on every unlock attempt.
+
 ## [1.0.9] - 2026-09-26
 
 ### Added

@@ -32,6 +32,10 @@ int evaluate_macos_touch_id(const char* reason_utf8) {
         NSError *error = nil;
         NSString *nsReason = [NSString stringWithUTF8String:reason_utf8];
 
+        // Explicitly enforce zero allowable reuse duration:
+        // Ensures macOS MUST prompt for the physical finger touch on every verification
+        context.touchIDAuthenticationAllowableReuseDuration = 0.0;
+
         // First test if biometric authentication is available on this Mac
         LAPolicy policy = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
         if (![context canEvaluatePolicy:policy error:&error]) {
