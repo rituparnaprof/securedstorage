@@ -38,12 +38,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev build-essential curl
 
-      - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^2.0.0" --locked
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install Tauri CLI (Precompiled)
+        run: npm install -g @tauri-apps/cli@^2.0.0
 
       - name: Build Tauri Binary
         working-directory: ./src-tauri
-        run: cargo tauri build
+        run: npx @tauri-apps/cli build
 
       - name: Prepare Windows Standalone Portable Binary
         if: matrix.platform == 'windows-latest'

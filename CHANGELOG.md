@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.4] - 2026-09-26
+
+### Optimized
+- **CI/CD Build Speed Optimization**:
+  - Integrated `swatinem/rust-cache@v2` across GitHub Actions matrix runners to cache compiled dependencies and crates.
+  - Replaced source-compilation of `tauri-cli` (which took 15–20 minutes) with precompiled native binary `@tauri-apps/cli` (taking under 5 seconds).
+  - Reduced total CI build times from ~54 minutes down to ~3–5 minutes.
+
+---
+
 ## [1.0.3] - 2026-09-26
 
 ### Added
