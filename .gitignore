@@ -1,0 +1,15 @@
+# Build artifacts
+target/
+src-tauri/target/
+node_modules/
+dist/
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Vault sensitive local data (NEVER commit to git!)
+*.enc
+vault.enc
+test-vault.enc

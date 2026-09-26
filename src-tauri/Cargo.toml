@@ -1,0 +1,42 @@
+[package]
+name = "secured-storage"
+version = "1.0.0"
+description = "Hardened Cross-Platform Offline PQC-Compliant Password Vault"
+authors = ["rituparnaprof"]
+edition = "2021"
+
+[lib]
+name = "secured_storage_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", default-features = false }
+
+[dependencies]
+tauri = { version = "2.1", features = [] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+aes-gcm = "0.10.3"
+argon2 = { version = "0.5.3", features = ["std"] }
+rand = "0.8.5"
+zeroize = { version = "1.8", features = ["derive"] }
+subtle = "2.6"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+dirs = "5.0"
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_Memory",
+    "Win32_Security"
+] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = true

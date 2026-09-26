@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecuredStorage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="shielded-body">
+
+  <!-- TOP SECURITY BANNER -->
+  <header class="app-header">
+    <div class="logo-group">
+      <div class="lock-badge">🛡️</div>
+      <div>
+        <h1 class="app-title">SecuredStorage</h1>
+        <span class="pqc-tag">PQC-Compliant • Zero-Cloud • Hardware-Bound</span>
+      </div>
+    </div>
+    <div id="headerActions" class="header-actions hidden">
+      <button id="addEntryBtn" class="btn btn-primary">+ Add Credential</button>
+      <button id="lockVaultBtn" class="btn btn-danger">🔒 Lock Vault</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="main-container">
+
+    <!-- SCREEN 1: INITIALIZE VAULT (FIRST RUN) -->
+    <section id="initScreen" class="auth-card hidden">
+      <h2>Initialize Your Vault</h2>
+      <p class="subtitle">Set your Master Password and 6-Digit PIN to generate your quantum-resistant encryption key.</p>
+      
+      <div class="form-group">
+        <label for="initPassword">Master Password</label>
+        <input type="password" id="initPassword" placeholder="Enter high-entropy password" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label for="initPin">6-Digit Hardware PIN (000000–999999)</label>
+        <input type="password" id="initPin" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" autocomplete="off" inputmode="numeric">
+        <small class="helper-text">Required alongside Biometrics (Touch ID / Windows Hello) to unlock.</small>
+      </div>
+
+      <div id="initError" class="alert-box error hidden"></div>
+      <button id="btnCreateVault" class="btn btn-success btn-block">Encrypt & Create Vault</button>
+    </section>
+
+    <!-- SCREEN 2: AUTHENTICATION SCREEN -->
+    <section id="authScreen" class="auth-card">
+      <div class="auth-tabs">
+        <button id="tabBio" class="tab-btn active">Biometric + 6-Digit PIN</button>
+        <button id="tabPassword" class="tab-btn">Master Password</button>
+      </div>
+
+      <!-- Biometric + PIN Tab Content -->
+      <div id="bioAuthTab" class="tab-content">
+        <p class="subtitle">Authenticate with Touch ID / Windows Hello and enter your 6-digit PIN.</p>
+        <div class="form-group">
+          <label for="bioPin">Enter 6-Digit PIN</label>
+          <input type="password" id="bioPin" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" autocomplete="off" inputmode="numeric">
+        </div>
+        <button id="btnBioUnlock" class="btn btn-primary btn-block">Scan Biometric & Unlock</button>
+      </div>
+
+      <!-- Password Tab Content -->
+      <div id="passwordAuthTab" class="tab-content hidden">
+        <p class="subtitle">Enter your Master Password to decrypt your credentials.</p>
+        <div class="form-group">
+          <label for="authPassword">Master Password</label>
+          <input type="password" id="authPassword" placeholder="Enter Master Password" autocomplete="off">
+        </div>
+        <button id="btnPasswordUnlock" class="btn btn-primary btn-block">Unlock with Password</button>
+      </div>
+
+      <div id="authError" class="alert-box error hidden"></div>
+    </section>
+
+    <!-- SCREEN 3: VAULT VIEW (AUTHENTICATED) -->
+    <section id="vaultScreen" class="vault-card hidden">
+      <div class="vault-controls">
+        <div class="search-wrapper">
+          <input type="text" id="searchInput" placeholder="🔍 Search by Website..." autocomplete="off">
+        </div>
+        <div class="security-status">
+          <span class="status-indicator"></span>
+          <span>Encrypted in RAM • Protected Display</span>
+        </div>
+      </div>
+
+      <!-- Notice: Only Website is Visible by Default -->
+      <div class="privacy-notice">
+        <span>👁️ Strict Privacy Mode: Only <strong>Website</strong> is visible. All other fields are masked. Click <strong>Reveal</strong> on an entry to view for 10 seconds.</span>
+      </div>
+
+      <!-- Entries Table -->
+      <div class="table-container">
+        <table class="vault-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Website</th>
+              <th style="width: 18%;">Application</th>
+              <th style="width: 18%;">Username</th>
+              <th style="width: 18%;">Password</th>
+              <th style="width: 13%;">Notes</th>
+              <th style="width: 8%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vaultTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyVaultMsg" class="empty-state hidden">
+        <p>No credentials stored yet. Click <strong>+ Add Credential</strong> to store your first entry.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ADD CREDENTIAL -->
+  <div id="addModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Credential</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="modalApp">Application</label>
+          <input type="text" id="modalApp" placeholder="e.g. Work VPN, Trading Client, Banking" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="modalWebsite">Website (Visible upon unlock)</label>
+          <input type="text" id="modalWebsite" placeholder="e.g. https://portal.company.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="modalUser">Username</label>
+          <input type="text" id="modalUser" placeholder="e.g. admin@company.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <div class="label-row">
+            <label for="modalPass">Password</label>
+            <button id="btnGeneratePass" type="button" class="btn-link">Generate Strong</button>
+          </div>
+          <input type="password" id="modalPass" placeholder="Enter or generate password" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="modalNotes">Notes</label>
+          <textarea id="modalNotes" rows="3" placeholder="Security questions, PINs, or recovery codes" autocomplete="off"></textarea>
+        </div>
+        <div id="modalError" class="alert-box error hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveCredentialBtn" class="btn btn-success">Save & Encrypt</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
