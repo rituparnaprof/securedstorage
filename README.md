@@ -335,3 +335,27 @@ overflow-checks = true # Enforces runtime panic on arithmetic overflow
   |         - Zeroizes MEK in RAM, purges DOM, returns to Step 1      |
   +-------------------------------------------------------------------+
 ```
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** (GPL-3.0-or-later).
+
+See the [LICENSE](file:///Users/rituparna/Documents/code/SecuredStorage/LICENSE) file for the full text.
+
+```
+SecuredStorage - PQC-Compliant Offline Password Vault
+Copyright (C) 2026 Rituparna Ghosh
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+```
+

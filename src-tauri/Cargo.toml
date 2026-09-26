@@ -4,6 +4,7 @@ version = "1.0.0"
 description = "Hardened Cross-Platform Offline PQC-Compliant Password Vault"
 authors = ["rituparnaprof"]
 edition = "2021"
+license = "GPL-3.0-or-later"
 
 [lib]
 name = "secured_storage_lib"

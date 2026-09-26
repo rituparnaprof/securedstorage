@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.7] - 2026-09-26
+
+### Added
+- **GNU General Public License v3.0 (GPL-3.0-or-later)**:
+  - Added official GNU GPL 3.0 [`LICENSE`](file:///Users/rituparna/Documents/code/SecuredStorage/LICENSE) file to project root.
+  - Formally licensed repository in `Cargo.toml` and `package.json` (`license = "GPL-3.0-or-later"`).
+  - Embedded standard GNU GPL-3.0 copyright header across all source files: Rust backend (`main.rs`, `lib.rs`, `crypto.rs`, `security.rs`, `vault.rs`, `build.rs`), client frontend (`app.js`, `style.css`, `index.html`), and project documentation (`README.md`).
+
+---
+
 ## [1.0.6] - 2026-09-26
 
 ### Added

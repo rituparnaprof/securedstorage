@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Hardened Cross-Platform Offline PQC-Compliant Password Vault",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "tauri": "tauri"
   },
