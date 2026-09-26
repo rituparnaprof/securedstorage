@@ -576,6 +576,7 @@ function renderVaultTable(entries) {
   filtered.forEach(entry => {
     const tr = document.createElement('tr');
     tr.id = `row-${entry.id}`;
+    tr.className = 'vault-row';
 
     // Site (Plaintext visible)
     const tdWeb = document.createElement('td');
@@ -604,24 +605,29 @@ function renderVaultTable(entries) {
     tdNotes.textContent = '••••••••••••';
     tr.appendChild(tdNotes);
 
-    // Actions: Ephemeral Reveal & Delete
+    // Actions: Ephemeral Reveal & Delete (Sleek Ghost Micro-Buttons)
     const tdActions = document.createElement('td');
+    tdActions.className = 'actions-cell';
+
+    const actionsWrapper = document.createElement('div');
+    actionsWrapper.className = 'actions-wrapper';
     
     const revealBtn = document.createElement('button');
-    revealBtn.className = 'btn-icon';
+    revealBtn.id = `btn-reveal-${entry.id}`;
+    revealBtn.className = 'btn-icon-action';
     revealBtn.title = 'Reveal fields for 10 seconds';
-    revealBtn.textContent = '👁️ Reveal';
+    revealBtn.innerHTML = '👁️';
     revealBtn.addEventListener('click', () => handleEphemeralReveal(entry.id));
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn-icon delete';
+    deleteBtn.className = 'btn-icon-action delete';
     deleteBtn.title = 'Delete Credential';
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.style.marginLeft = '6px';
+    deleteBtn.innerHTML = '🗑️';
     deleteBtn.addEventListener('click', () => handleDeleteEntry(entry.id));
 
-    tdActions.appendChild(revealBtn);
-    tdActions.appendChild(deleteBtn);
+    actionsWrapper.appendChild(revealBtn);
+    actionsWrapper.appendChild(deleteBtn);
+    tdActions.appendChild(actionsWrapper);
     tr.appendChild(tdActions);
 
     vaultTableBody.appendChild(tr);
@@ -652,10 +658,16 @@ async function handleEphemeralReveal(entryId) {
     const cellUser = document.getElementById(`cell-user-${entryId}`);
     const cellPass = document.getElementById(`cell-pass-${entryId}`);
     const cellNotes = document.getElementById(`cell-notes-${entryId}`);
+    const revealBtn = document.getElementById(`btn-reveal-${entryId}`);
 
     if (cellUser) { cellUser.textContent = userVal; cellUser.className = 'unmasked-cell'; }
     if (cellPass) { cellPass.textContent = passVal; cellPass.className = 'unmasked-cell'; }
     if (cellNotes) { cellNotes.textContent = notesVal || '(None)'; cellNotes.className = 'unmasked-cell'; }
+    if (revealBtn) {
+      revealBtn.innerHTML = '🔒';
+      revealBtn.title = 'Hide fields';
+      revealBtn.classList.add('active-reveal');
+    }
 
     // Start 10-second auto-remask timer
     unmaskTimers[entryId] = setTimeout(() => {
@@ -672,10 +684,16 @@ function remaskRow(entryId) {
   const cellUser = document.getElementById(`cell-user-${entryId}`);
   const cellPass = document.getElementById(`cell-pass-${entryId}`);
   const cellNotes = document.getElementById(`cell-notes-${entryId}`);
+  const revealBtn = document.getElementById(`btn-reveal-${entryId}`);
 
   if (cellUser) { cellUser.textContent = '••••••••••••'; cellUser.className = 'masked-cell'; }
   if (cellPass) { cellPass.textContent = '••••••••••••'; cellPass.className = 'masked-cell'; }
   if (cellNotes) { cellNotes.textContent = '••••••••••••'; cellNotes.className = 'masked-cell'; }
+  if (revealBtn) {
+    revealBtn.innerHTML = '👁️';
+    revealBtn.title = 'Reveal fields for 10 seconds';
+    revealBtn.classList.remove('active-reveal');
+  }
 }
 
 function clearAllUnmaskTimers() {

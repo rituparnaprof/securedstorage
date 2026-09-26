@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Completely removed the redundant `Application` field from the "Add Credential" modal and vault entries table.
   - Renamed `Website` to **`Site`** with clear plain-text guidance (e.g., Google, Banking, AWS, Work Email) rather than requiring full URL syntax.
   - Adjusted vault table column widths to 5 cleanly aligned columns (`Site`, `Username`, `Password`, `Notes`, `Actions`).
+- **Sleek Modern Table Row UI & Micro-Action Ghost Buttons**:
+  - Reduced table row vertical footprint from ~56px to a compact 38px (32% reduction) with smooth hover transitions (`.vault-row:hover`).
+  - Replaced bulky boxed buttons with 28×28px borderless ghost micro-buttons (`.btn-icon-action`) with responsive hover states and active-scale feedback.
+  - Implemented interactive reveal toggling (smoothly flips between `👁️` and `🔒` with an amber highlight badge when unmasked).
+  - Aligned Actions column to the right with refined monospace secret bullets (`••••••••••••`).
 
 ### Fixed
 - **Native Biometric IPC Resolution & Zero Touch ID Reuse**:

@@ -509,6 +509,46 @@ textarea:focus {
   border-color: var(--accent-rose);
 }
 
+/* Modern Sleek Micro-Action Ghost Buttons */
+.btn-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--transition-fast);
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-icon-action:hover {
+  background-color: var(--bg-hover);
+  color: var(--accent-cyan);
+  border-color: var(--border-subtle);
+}
+
+.btn-icon-action.active-reveal {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.btn-icon-action.delete:hover {
+  background-color: rgba(244, 63, 94, 0.12);
+  color: var(--accent-rose);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.btn-icon-action:active {
+  transform: scale(0.92);
+}
+
 /* --------------------------------------------------------------------------
    7. VAULT DATA TABLE & MASKING INHERITANCE
    -------------------------------------------------------------------------- */
@@ -574,7 +614,7 @@ textarea:focus {
 
 .vault-table th {
   text-align: left;
-  padding: 12px 14px;
+  padding: 8px 12px;
   background-color: var(--bg-input);
   color: var(--text-muted);
   font-weight: 600;
@@ -584,31 +624,61 @@ textarea:focus {
   border-bottom: 1px solid var(--border-subtle);
 }
 
+.vault-row {
+  transition: background-color var(--transition-fast);
+}
+
+.vault-row:hover {
+  background-color: var(--bg-hover);
+}
+
 .vault-table td {
-  padding: 14px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border-glass);
   vertical-align: middle;
+  height: 38px;
+  box-sizing: border-box;
 }
 
 .website-cell {
   font-weight: 600;
   color: var(--text-link);
-  word-break: break-all;
+  word-break: break-word;
+  font-size: 12px;
 }
 
 .masked-cell {
   font-family: var(--font-mono);
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: var(--text-dim);
+  opacity: 0.65;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none !important;
 }
 
 .unmasked-cell {
   font-family: var(--font-mono);
   color: var(--text-main);
   background-color: rgba(245, 158, 11, 0.15);
-  padding: 4px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 11px;
+  display: inline-block;
+  line-height: 1.3;
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.actions-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 /* --------------------------------------------------------------------------
