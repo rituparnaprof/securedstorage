@@ -45,11 +45,23 @@ jobs:
         working-directory: ./src-tauri
         run: cargo tauri build
 
+      - name: Prepare Windows Standalone Portable Binary
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: |
+          mkdir -p standalone
+          if [ -f src-tauri/target/release/SecuredStorage.exe ]; then
+            cp src-tauri/target/release/SecuredStorage.exe standalone/SecuredStorage-Windows-Portable.exe
+          elif [ -f src-tauri/target/release/secured-storage.exe ]; then
+            cp src-tauri/target/release/secured-storage.exe standalone/SecuredStorage-Windows-Portable.exe
+          fi
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SecuredStorage-${{ matrix.platform }}
           path: |
+            standalone/*.exe
             src-tauri/target/release/bundle/dmg/*.dmg
             src-tauri/target/release/bundle/macos/*.app
             src-tauri/target/release/bundle/msi/*.msi

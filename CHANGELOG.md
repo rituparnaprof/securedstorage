@@ -13,6 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.2] - 2026-09-26
+
+### Added
+- **Adaptive Cross-Platform Iconography**:
+  - High-resolution squircle icons with frosted glassmorphic gradients and golden padlock emblem.
+  - Multi-resolution support engineered to adapt seamlessly across macOS, Windows, and Linux under Dark, Light, Tint, and Glass theme environments.
+  - Formats: Embedded multi-size `.ico` (16, 32, 64, 128, 256), macOS `.icns`, and high-res PNGs up to 512x512.
+- **Windows Standalone Portable Executable**:
+  - Automated extraction and packaging of `SecuredStorage-Windows-Portable.exe` in GitHub Actions for direct execution without an installer.
+- **Centralized CSS Design System**:
+  - Unified `style.css` architecture where 100% of component styles inherit from centralized CSS custom properties (`:root` design tokens).
+  - Built-in theme switcher supporting Dark, Light, Tint (emerald/cyan), and Glass (translucent acrylic with backdrop blur) schemes.
+  - Automatic OS color scheme preference detection.
+
+---
+
 ## [1.0.1] - 2026-09-26
 
 ### Fixed

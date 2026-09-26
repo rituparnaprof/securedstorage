@@ -1,20 +1,156 @@
-/* SecuredStorage - High Security Theme & Anti-Selection Styles */
+/* ==========================================================================
+   SecuredStorage - Centralized Design System & CSS Token Architecture
+   All component styles inherit directly from this single centralized stylesheet.
+   Supports: Dark, Light, Tint, and Glass Schemes with OS-preference auto-switching.
+   ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   1. CENTRALIZED DESIGN TOKENS (CSS VARIABLES)
+   -------------------------------------------------------------------------- */
 :root {
-  --bg-primary: #0a0f1d;
-  --bg-card: #131b2e;
-  --bg-input: #0e1526;
-  --border-color: #23304a;
-  --text-main: #f1f5f9;
+  /* Typography Tokens */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* Sizing & Spacing Tokens */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Glassmorphism Filters */
+  --blur-glass: blur(16px);
+  --blur-modal: blur(24px);
+
+  /* ---------------- DARK THEME (DEFAULT) ---------------- */
+  --bg-app: #080d1a;
+  --bg-surface: #0f172a;
+  --bg-surface-glass: rgba(15, 23, 42, 0.75);
+  --bg-input: #0b1120;
+  --bg-input-focus: #0f172a;
+  --bg-hover: rgba(30, 41, 59, 0.6);
+
+  --border-subtle: #1e293b;
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-focus: #06b6d4;
+
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --text-dim: #64748b;
+  --text-link: #38bdf8;
+
   --accent-cyan: #06b6d4;
+  --accent-cyan-hover: #22d3ee;
   --accent-emerald: #10b981;
+  --accent-emerald-hover: #34d399;
   --accent-rose: #f43f5e;
+  --accent-rose-hover: #fb7185;
   --accent-amber: #f59e0b;
+
+  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.5);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glow: 0 0 16px rgba(6, 182, 212, 0.25);
 }
 
-/* ANTI-EXFILTRATION: Prevent text selection globally */
+/* ---------------- LIGHT THEME ---------------- */
+[data-theme="light"] {
+  --bg-app: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-glass: rgba(255, 255, 255, 0.85);
+  --bg-input: #f8fafc;
+  --bg-input-focus: #ffffff;
+  --bg-hover: rgba(241, 245, 249, 0.8);
+
+  --border-subtle: #cbd5e1;
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --border-focus: #0284c7;
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --text-link: #0284c7;
+
+  --accent-cyan: #0284c7;
+  --accent-cyan-hover: #0369a1;
+  --accent-emerald: #059669;
+  --accent-emerald-hover: #047857;
+  --accent-rose: #e11d48;
+  --accent-rose-hover: #be123c;
+  --accent-amber: #d97706;
+
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 16px rgba(2, 132, 199, 0.15);
+}
+
+/* ---------------- TINT THEME (CYAN/EMERALD ACCENTED) ---------------- */
+[data-theme="tint"] {
+  --bg-app: #03141a;
+  --bg-surface: #06222b;
+  --bg-surface-glass: rgba(6, 34, 43, 0.8);
+  --bg-input: #041a21;
+  --bg-input-focus: #072b36;
+  --bg-hover: rgba(10, 46, 58, 0.7);
+
+  --border-subtle: #0d3c4a;
+  --border-glass: rgba(6, 182, 212, 0.18);
+  --border-focus: #10b981;
+
+  --text-main: #ecfeff;
+  --text-muted: #a5f3fc;
+  --text-dim: #0891b2;
+  --text-link: #22d3ee;
+
+  --accent-cyan: #06b6d4;
+  --accent-cyan-hover: #22d3ee;
+  --accent-emerald: #10b981;
+  --accent-emerald-hover: #34d399;
+  --accent-rose: #f43f5e;
+  --accent-rose-hover: #fb7185;
+  --accent-amber: #f59e0b;
+
+  --shadow-card: 0 12px 36px rgba(3, 20, 26, 0.7);
+  --shadow-glass: 0 8px 32px 0 rgba(6, 182, 212, 0.15);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* ---------------- GLASS THEME (TRANSLUCENT ACRYLIC) ---------------- */
+[data-theme="glass"] {
+  --bg-app: radial-gradient(circle at 50% 0%, #1e1b4b, #0f172a 70%);
+  --bg-surface: rgba(15, 23, 42, 0.6);
+  --bg-surface-glass: rgba(255, 255, 255, 0.05);
+  --bg-input: rgba(15, 23, 42, 0.5);
+  --bg-input-focus: rgba(15, 23, 42, 0.75);
+  --bg-hover: rgba(255, 255, 255, 0.1);
+
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-glass: rgba(255, 255, 255, 0.18);
+  --border-focus: #38bdf8;
+
+  --text-main: #ffffff;
+  --text-muted: #cbd5e1;
+  --text-dim: #94a3b8;
+  --text-link: #38bdf8;
+
+  --accent-cyan: #38bdf8;
+  --accent-cyan-hover: #7dd3fc;
+  --accent-emerald: #34d399;
+  --accent-emerald-hover: #6ee7b7;
+  --accent-rose: #fb7185;
+  --accent-rose-hover: #fda4af;
+  --accent-amber: #fbbf24;
+
+  --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --shadow-glow: 0 0 24px rgba(56, 189, 248, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   2. GLOBAL ANTI-EXFILTRATION & BASE RESET
+   All elements inherit anti-selection and zero-drag guarantees.
+   -------------------------------------------------------------------------- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -27,23 +163,29 @@
 }
 
 body.shielded-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-primary);
+  font-family: var(--font-sans);
+  background: var(--bg-app);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  transition: background var(--transition-smooth), color var(--transition-smooth);
 }
 
-/* Header */
+/* --------------------------------------------------------------------------
+   3. HEADER & CONTROLS INHERITANCE
+   -------------------------------------------------------------------------- */
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 28px;
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-surface-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border-bottom: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
 }
 
 .logo-group {
@@ -54,13 +196,14 @@ body.shielded-body {
 
 .lock-badge {
   font-size: 28px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
 }
 
 .app-title {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .pqc-tag {
@@ -73,10 +216,29 @@ body.shielded-body {
 
 .header-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* Main Container */
+.theme-selector {
+  background-color: var(--bg-input);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.theme-selector:focus {
+  border-color: var(--border-focus);
+}
+
+/* --------------------------------------------------------------------------
+   4. LAYOUT & CARDS INHERITANCE
+   -------------------------------------------------------------------------- */
 .main-container {
   flex: 1;
   padding: 32px 28px;
@@ -85,21 +247,22 @@ body.shielded-body {
   width: 100%;
 }
 
-/* Auth Cards */
 .auth-card {
   max-width: 480px;
   margin: 40px auto;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background-color: var(--bg-surface-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   padding: 32px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-card);
 }
 
 .auth-card h2 {
   font-size: 22px;
   margin-bottom: 8px;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .subtitle {
@@ -109,10 +272,10 @@ body.shielded-body {
   line-height: 1.5;
 }
 
-/* Auth Tabs */
+/* Tabs */
 .auth-tabs {
   display: flex;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 24px;
 }
 
@@ -126,7 +289,7 @@ body.shielded-body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .tab-btn.active {
@@ -134,7 +297,9 @@ body.shielded-body {
   border-bottom-color: var(--accent-cyan);
 }
 
-/* Forms */
+/* --------------------------------------------------------------------------
+   5. FORM CONTROLS INHERITANCE
+   -------------------------------------------------------------------------- */
 .form-group {
   margin-bottom: 18px;
 }
@@ -158,7 +323,7 @@ body.shielded-body {
 .btn-link {
   background: none;
   border: none;
-  color: var(--accent-cyan);
+  color: var(--text-link);
   font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
@@ -170,18 +335,20 @@ textarea {
   width: 100%;
   padding: 12px 14px;
   background-color: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus {
-  border-color: var(--accent-cyan);
+  border-color: var(--border-focus);
+  background-color: var(--bg-input-focus);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
 }
 
 .helper-text {
@@ -191,15 +358,21 @@ textarea:focus {
   margin-top: 4px;
 }
 
-/* Buttons */
+/* --------------------------------------------------------------------------
+   6. BUTTON COMPONENT SUITE
+   -------------------------------------------------------------------------- */
 .btn {
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: none;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-block {
@@ -209,18 +382,19 @@ textarea:focus {
 
 .btn-primary {
   background-color: var(--accent-cyan);
-  color: #05131f;
+  color: #03141f;
+  box-shadow: var(--shadow-glow);
 }
 .btn-primary:hover {
-  background-color: #22d3ee;
+  background-color: var(--accent-cyan-hover);
 }
 
 .btn-success {
   background-color: var(--accent-emerald);
-  color: #022013;
+  color: #021a11;
 }
 .btn-success:hover {
-  background-color: #34d399;
+  background-color: var(--accent-emerald-hover);
 }
 
 .btn-danger {
@@ -228,38 +402,51 @@ textarea:focus {
   color: #ffffff;
 }
 .btn-danger:hover {
-  background-color: #fb7185;
+  background-color: var(--accent-rose-hover);
 }
 
 .btn-secondary {
-  background-color: #23304a;
+  background-color: var(--bg-hover);
   color: var(--text-main);
+  border: 1px solid var(--border-subtle);
 }
 .btn-secondary:hover {
-  background-color: #334365;
+  border-color: var(--border-focus);
 }
 
-/* Alert Boxes */
-.alert-box {
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 16px;
+.btn-icon {
+  background: var(--bg-surface-glass);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all var(--transition-fast);
 }
 
-.alert-box.error {
-  background-color: rgba(244, 63, 94, 0.15);
-  border: 1px solid var(--accent-rose);
-  color: #fca5a5;
+.btn-icon:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+  border-color: var(--accent-cyan);
 }
 
-/* Vault View */
+.btn-icon.delete:hover {
+  color: var(--accent-rose);
+  border-color: var(--accent-rose);
+}
+
+/* --------------------------------------------------------------------------
+   7. VAULT DATA TABLE & MASKING INHERITANCE
+   -------------------------------------------------------------------------- */
 .vault-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background-color: var(--bg-surface-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-card);
 }
 
 .vault-controls {
@@ -287,9 +474,9 @@ textarea:focus {
 .status-indicator {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background-color: var(--accent-emerald);
-  box-shadow: 0 0 8px var(--accent-emerald);
+  box-shadow: 0 0 10px var(--accent-emerald);
 }
 
 .privacy-notice {
@@ -297,12 +484,11 @@ textarea:focus {
   border-left: 3px solid var(--accent-cyan);
   padding: 10px 14px;
   font-size: 12px;
-  color: #a5f3fc;
+  color: var(--text-main);
   margin-bottom: 20px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
-/* Vault Table */
 .table-container {
   overflow-x: auto;
 }
@@ -316,80 +502,54 @@ textarea:focus {
 .vault-table th {
   text-align: left;
   padding: 12px 14px;
-  background-color: rgba(14, 21, 38, 0.7);
+  background-color: var(--bg-input);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 11px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .vault-table td {
   padding: 14px;
-  border-bottom: 1px solid rgba(35, 48, 74, 0.5);
+  border-bottom: 1px solid var(--border-glass);
   vertical-align: middle;
 }
 
 .website-cell {
   font-weight: 600;
-  color: #38bdf8;
+  color: var(--text-link);
   word-break: break-all;
 }
 
 .masked-cell {
-  font-family: monospace;
+  font-family: var(--font-mono);
   letter-spacing: 2px;
-  color: #64748b;
+  color: var(--text-dim);
 }
 
 .unmasked-cell {
-  font-family: monospace;
-  color: #f8fafc;
+  font-family: var(--font-mono);
+  color: var(--text-main);
   background-color: rgba(245, 158, 11, 0.15);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
-/* Action Icons */
-.btn-icon {
-  background: none;
-  border: 1px solid var(--border-color);
-  padding: 6px 10px;
-  border-radius: 6px;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-  background-color: var(--bg-input);
-  color: #ffffff;
-  border-color: var(--accent-cyan);
-}
-
-.btn-icon.delete:hover {
-  color: var(--accent-rose);
-  border-color: var(--accent-rose);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 48px;
-  color: var(--text-muted);
-}
-
-/* Modal */
+/* --------------------------------------------------------------------------
+   8. MODAL & DIALOG INHERITANCE
+   -------------------------------------------------------------------------- */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(5, 10, 20, 0.85);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: var(--blur-modal);
+  -webkit-backdrop-filter: var(--blur-modal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -397,12 +557,14 @@ textarea:focus {
 }
 
 .modal-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background-color: var(--bg-surface-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 520px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-card);
 }
 
 .modal-header {
@@ -410,12 +572,12 @@ textarea:focus {
   justify-content: space-between;
   align-items: center;
   padding: 18px 24px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-glass);
 }
 
 .modal-header h3 {
   font-size: 18px;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .close-btn {
@@ -435,8 +597,27 @@ textarea:focus {
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid var(--border-color);
-  background-color: rgba(14, 21, 38, 0.4);
+  border-top: 1px solid var(--border-glass);
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.alert-box {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.alert-box.error {
+  background-color: rgba(244, 63, 94, 0.15);
+  border: 1px solid var(--accent-rose);
+  color: #fda4af;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-muted);
 }
 
 .hidden {

@@ -129,9 +129,25 @@ const modalPass = document.getElementById('modalPass');
 const modalNotes = document.getElementById('modalNotes');
 const modalError = document.getElementById('modalError');
 const lockVaultBtn = document.getElementById('lockVaultBtn');
+const themeSelect = document.getElementById('themeSelect');
+
+// Theme Management: Dark, Light, Tint, Glass
+function setupTheme() {
+  const saved = localStorage.getItem('ss_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (themeSelect) {
+    themeSelect.value = saved;
+    themeSelect.addEventListener('change', (e) => {
+      const theme = e.target.value;
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('ss_theme', theme); } catch(err) {}
+    });
+  }
+}
 
 // Initialize application state
 async function initApp() {
+  setupTheme();
   resetIdleTimer();
   setupEventListeners();
 
