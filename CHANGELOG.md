@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.8] - 2026-09-26
+
+### Added
+- **Native Test Suite & Local Compilation Verification**:
+  - Implemented unit tests in [`src/crypto.rs`](file:///Users/rituparna/Documents/code/SecuredStorage/src-tauri/src/crypto.rs) covering MEK generation, AES-256-GCM roundtrip, dual-slot key derivation lifecycle, and constant-time comparison.
+  - Implemented unit tests in [`src/vault.rs`](file:///Users/rituparna/Documents/code/SecuredStorage/src-tauri/src/vault.rs) covering default masked view enforcement, credential payload encryption/decryption, and session zeroization.
+  - Successfully verified end-to-end compilation with `cargo check`, `cargo test` (all 7 tests passed), and local macOS bundle compilation (`SecuredStorage.app`).
+
+---
+
 ## [1.0.7] - 2026-09-26
 
 ### Added

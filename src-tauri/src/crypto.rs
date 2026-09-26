@@ -164,3 +164,54 @@ pub fn unlock_key_slot(secret: &[u8], slot: &KeySlot) -> Result<Zeroizing<[u8; K
 pub fn secure_compare(a: &[u8], b: &[u8]) -> bool {
     a.ct_eq(b).into()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mek_generation() {
+        let mek1 = generate_random_mek();
+        let mek2 = generate_random_mek();
+        assert_eq!(mek1.len(), KEY_LEN);
+        assert_eq!(mek2.len(), KEY_LEN);
+        assert_ne!(&mek1[..], &mek2[..]);
+    }
+
+    #[test]
+    fn test_aes_gcm_roundtrip() {
+        let mek = generate_random_mek();
+        let nonce_bytes = generate_random_bytes(NONCE_LEN);
+        let mut nonce = [0u8; NONCE_LEN];
+        nonce.copy_from_slice(&nonce_bytes);
+
+        let plaintext = b"SecuredStorage Super Secret Data";
+        let ciphertext = encrypt_aes_gcm(&mek, &nonce, plaintext).expect("Encryption failed");
+        let decrypted = decrypt_aes_gcm(&mek, &nonce, &ciphertext).expect("Decryption failed");
+        assert_eq!(&decrypted[..], plaintext);
+    }
+
+    #[test]
+    fn test_key_slot_lifecycle() {
+        let mek = generate_random_mek();
+        let secret = "StrongP@ssw0rd123!456789";
+
+        let slot = create_key_slot(secret.as_bytes(), &mek).expect("Key slot creation failed");
+        assert!(slot.enabled);
+
+        let unlocked_mek = unlock_key_slot(secret.as_bytes(), &slot).expect("Key slot unlocking failed");
+        assert_eq!(&mek[..], &unlocked_mek[..]);
+
+        let wrong_unlock = unlock_key_slot(b"WrongP@ssw0rd!456789", &slot);
+        assert!(wrong_unlock.is_err());
+    }
+
+    #[test]
+    fn test_secure_compare() {
+        let a = b"secret_token_123";
+        let b = b"secret_token_123";
+        let c = b"secret_token_456";
+        assert!(secure_compare(a, b));
+        assert!(!secure_compare(a, c));
+    }
+}

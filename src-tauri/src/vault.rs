@@ -459,3 +459,80 @@ fn get_platform_hardware_token() -> Vec<u8> {
 
     seed
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_masked_credential_default_view() {
+        let entry = CredentialEntry {
+            id: "uuid-1234".to_string(),
+            application: "GitHub".to_string(),
+            website: "https://github.com".to_string(),
+            username: "octocat".to_string(),
+            password: "SuperSecretPassword!".to_string(),
+            notes: "My personal production token".to_string(),
+            created_at: 1000,
+            updated_at: 1000,
+        };
+
+        let masked_list = get_masked_list(&[entry]);
+        assert_eq!(masked_list.len(), 1);
+        let masked = &masked_list[0];
+        // ONLY website is plaintext
+        assert_eq!(masked.id, "uuid-1234");
+        assert_eq!(masked.website, "https://github.com");
+        // Everything else is masked
+        assert_eq!(masked.application, MASK_PLACEHOLDER);
+        assert_eq!(masked.username, MASK_PLACEHOLDER);
+        assert_eq!(masked.password, MASK_PLACEHOLDER);
+        assert_eq!(masked.notes, MASK_PLACEHOLDER);
+    }
+
+    #[test]
+    fn test_entries_serialization_and_encryption() {
+        let mek = generate_random_mek();
+        let entries = vec![CredentialEntry {
+            id: "entry-1".to_string(),
+            application: "AWS".to_string(),
+            website: "https://console.aws.amazon.com".to_string(),
+            username: "admin".to_string(),
+            password: "P@ssw0rdAWS2026!".to_string(),
+            notes: "Root account".to_string(),
+            created_at: 2000,
+            updated_at: 2000,
+        }];
+
+        let serialized = serde_json::to_vec(&entries).expect("Serialization failed");
+        let nonce_bytes = generate_random_bytes(NONCE_LEN);
+        let mut nonce = [0u8; NONCE_LEN];
+        nonce.copy_from_slice(&nonce_bytes);
+
+        let ciphertext = encrypt_aes_gcm(&mek, &nonce, &serialized).expect("Encryption failed");
+        let decrypted_bytes = decrypt_aes_gcm(&mek, &nonce, &ciphertext).expect("Decryption failed");
+        let decrypted_entries: Vec<CredentialEntry> = serde_json::from_slice(&decrypted_bytes).expect("Deserialization failed");
+
+        assert_eq!(decrypted_entries.len(), 1);
+        assert_eq!(decrypted_entries[0].application, "AWS");
+        assert_eq!(decrypted_entries[0].password, "P@ssw0rdAWS2026!");
+    }
+
+    #[test]
+    fn test_vault_session_lifecycle() {
+        let mut session = VaultSession::new();
+        assert!(!session.is_authenticated);
+        assert!(session.mek.is_none());
+
+        let mek = generate_random_mek();
+        session.is_authenticated = true;
+        session.mek = Some(mek);
+        assert!(session.is_authenticated);
+        assert!(session.mek.is_some());
+
+        session.lock();
+        assert!(!session.is_authenticated);
+        assert!(session.mek.is_none());
+        assert!(session.entries.is_empty());
+    }
+}
