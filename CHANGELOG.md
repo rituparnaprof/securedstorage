@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.9] - 2026-09-26
+
+### Added
+- **Native macOS Touch ID Integration (`LocalAuthentication`)**:
+  - Bridged native Objective-C `LAContext` (`src/touchid_macos.m`) directly into the Rust core to trigger the system Touch ID biometric sensor prompt.
+  - Implemented a two-step authentication UX: users scan Touch ID first, and once biometric authentication is verified, the UI reveals the 6-digit PIN input to decrypt the vault.
+- **Emergency Paper Recovery Key (Slot 3)**:
+  - Added a third cryptographic key slot wrapping the Master Encryption Key (MEK) with a high-entropy 128-bit air-gapped paper recovery code (`SEC-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX`).
+  - Added a dedicated "Emergency Recovery" tab on the authentication screen allowing users to restore their vault and reset their Master Password and PIN even if credentials are forgotten.
+  - Implemented automatic recovery key rotation upon each successful recovery.
+
+---
+
 ## [1.0.8] - 2026-09-26
 
 ### Added

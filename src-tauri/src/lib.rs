@@ -24,10 +24,16 @@ pub mod vault;
 
 use tauri::{Manager, State};
 use vault::{
-    add_new_entry, delete_entry_by_id, initialize_new_vault, reveal_entry_field,
-    unlock_with_biometric_and_pin, unlock_with_password, vault_file_exists, MaskedCredentialEntry,
-    SafeSession, VaultSession,
+    add_new_entry, delete_entry_by_id, initialize_new_vault, recover_vault_with_key,
+    reveal_entry_field, step_verify_biometrics, unlock_with_biometric_and_pin,
+    unlock_with_password, vault_file_exists, MaskedCredentialEntry, SafeSession, VaultSession,
 };
+
+#[derive(serde::Serialize)]
+pub struct RecoveryResult {
+    pub new_recovery_key: String,
+    pub entries: Vec<MaskedCredentialEntry>,
+}
 
 #[tauri::command]
 fn check_vault_exists() -> bool {
@@ -41,8 +47,14 @@ fn initialize_vault(
     session: State<'_, SafeSession>,
 ) -> Result<String, String> {
     let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
-    initialize_new_vault(&master_password, &pin, &mut sess)?;
-    Ok("Vault successfully initialized".to_string())
+    let recovery_key = initialize_new_vault(&master_password, &pin, &mut sess)?;
+    Ok(recovery_key)
+}
+
+#[tauri::command]
+fn trigger_biometric_scan(session: State<'_, SafeSession>) -> Result<bool, String> {
+    let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
+    step_verify_biometrics(&mut sess)
 }
 
 #[tauri::command]
@@ -61,6 +73,22 @@ fn unlock_vault_biometric(
 ) -> Result<Vec<MaskedCredentialEntry>, String> {
     let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
     unlock_with_biometric_and_pin(&pin, &mut sess)
+}
+
+#[tauri::command]
+fn recover_vault(
+    recovery_key: String,
+    new_password: String,
+    new_pin: String,
+    session: State<'_, SafeSession>,
+) -> Result<RecoveryResult, String> {
+    let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
+    let (new_key, entries) =
+        recover_vault_with_key(&recovery_key, &new_password, &new_pin, &mut sess)?;
+    Ok(RecoveryResult {
+        new_recovery_key: new_key,
+        entries,
+    })
 }
 
 #[tauri::command]
@@ -117,8 +145,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             check_vault_exists,
             initialize_vault,
+            trigger_biometric_scan,
             unlock_vault_password,
             unlock_vault_biometric,
+            recover_vault,
             reveal_field,
             add_entry,
             delete_entry,

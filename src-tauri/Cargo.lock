@@ -2809,6 +2809,7 @@ version = "1.0.0"
 dependencies = [
  "aes-gcm",
  "argon2",
+ "cc",
  "dirs 5.0.1",
  "libc",
  "rand",

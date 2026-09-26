@@ -57,7 +57,7 @@
       
       <div class="form-group">
         <label for="initPassword">Master Password</label>
-        <input type="password" id="initPassword" placeholder="Enter high-entropy password" autocomplete="off">
+        <input type="password" id="initPassword" placeholder="Enter high-entropy password (min 8 chars)" autocomplete="off">
       </div>
 
       <div class="form-group">
@@ -70,21 +70,72 @@
       <button id="btnCreateVault" class="btn btn-success btn-block">Encrypt & Create Vault</button>
     </section>
 
+    <!-- SCREEN 1B: EMERGENCY RECOVERY KEY DISPLAY (ONE-TIME VIEW) -->
+    <section id="recoveryKeyScreen" class="auth-card hidden">
+      <div style="text-align: center; margin-bottom: 12px;">
+        <span style="font-size: 2.5rem;">📜</span>
+        <h2>Emergency Paper Recovery Key</h2>
+        <p class="subtitle" style="color: var(--accent-amber); font-weight: 600;">
+          Physically write down this code on paper and store it in a secure safe!
+        </p>
+      </div>
+
+      <div class="recovery-box">
+        <div id="displayRecoveryKey" class="recovery-code-text">SEC-0000-0000-0000-0000-0000-0000-0000-0000</div>
+      </div>
+
+      <div class="alert-box warning" style="font-size: 0.85rem; line-height: 1.5;">
+        <strong>⚠️ Absolute Zero-Knowledge Warning:</strong> If you forget your Master Password, this paper key is the <u>ONLY</u> way to recover your vault. It is cold and air-gapped; no server or third party can reset it.
+      </div>
+
+      <label style="display: flex; align-items: center; gap: 10px; margin: 16px 0; cursor: pointer; font-size: 13px;">
+        <input type="checkbox" id="chkSavedRecoveryKey">
+        <span>I have physically written down my Emergency Recovery Key.</span>
+      </label>
+
+      <button id="btnConfirmRecoveryKey" class="btn btn-primary btn-block" disabled>
+        Proceed to Unlocked Vault
+      </button>
+    </section>
+
     <!-- SCREEN 2: AUTHENTICATION SCREEN -->
     <section id="authScreen" class="auth-card">
       <div class="auth-tabs">
-        <button id="tabBio" class="tab-btn active">Biometric + 6-Digit PIN</button>
+        <button id="tabBio" class="tab-btn active">Touch ID + PIN</button>
         <button id="tabPassword" class="tab-btn">Master Password</button>
+        <button id="tabRecovery" class="tab-btn">Emergency Recovery</button>
       </div>
 
-      <!-- Biometric + PIN Tab Content -->
+      <!-- Biometric + PIN Tab Content (Two-Step Verification) -->
       <div id="bioAuthTab" class="tab-content">
-        <p class="subtitle">Authenticate with Touch ID / Windows Hello and enter your 6-digit PIN.</p>
-        <div class="form-group">
-          <label for="bioPin">Enter 6-Digit PIN</label>
-          <input type="password" id="bioPin" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" autocomplete="off" inputmode="numeric">
+        <!-- Step 1: Scan Touch ID -->
+        <div id="bioStep1" class="bio-step-box">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div class="touchid-symbol">👆</div>
+            <p class="subtitle" style="margin-top: 4px;"><strong>Step 1:</strong> Scan your fingerprint with Mac Touch ID</p>
+          </div>
+          <button id="btnScanTouchID" class="btn btn-primary btn-block">
+            <span>Scan Touch ID / Biometrics</span>
+          </button>
         </div>
-        <button id="btnBioUnlock" class="btn btn-primary btn-block">Scan Biometric & Unlock</button>
+
+        <!-- Step 2: 6-Digit PIN (Revealed ONLY after Biometrics Verified) -->
+        <div id="bioStep2" class="bio-step-box hidden">
+          <div style="text-align: center; margin-bottom: 12px;">
+            <div class="verified-pill">
+              <span>✓</span> Touch ID Verified Successfully
+            </div>
+            <p class="subtitle"><strong>Step 2:</strong> Enter your 6-digit PIN to decrypt the vault.</p>
+          </div>
+          <div class="form-group">
+            <label for="bioPin">Enter 6-Digit PIN</label>
+            <input type="password" id="bioPin" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" autocomplete="off" inputmode="numeric">
+          </div>
+          <button id="btnBioUnlock" class="btn btn-success btn-block">Decrypt & Unlock Vault</button>
+          <button id="btnReScanBio" class="btn-link" style="margin-top: 10px; display: block; text-align: center; width: 100%;">
+            ← Re-scan Touch ID
+          </button>
+        </div>
       </div>
 
       <!-- Password Tab Content -->
@@ -95,6 +146,24 @@
           <input type="password" id="authPassword" placeholder="Enter Master Password" autocomplete="off">
         </div>
         <button id="btnPasswordUnlock" class="btn btn-primary btn-block">Unlock with Password</button>
+      </div>
+
+      <!-- Emergency Recovery Tab Content -->
+      <div id="recoveryAuthTab" class="tab-content hidden">
+        <p class="subtitle">Enter your Emergency Paper Recovery Key to unlock and reset your credentials.</p>
+        <div class="form-group">
+          <label for="recoveryInputKey">Emergency Paper Recovery Key</label>
+          <input type="text" id="recoveryInputKey" placeholder="SEC-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 0.9rem;">
+        </div>
+        <div class="form-group">
+          <label for="recoveryNewPassword">New Master Password (min 8 characters)</label>
+          <input type="password" id="recoveryNewPassword" placeholder="Enter new strong password" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="recoveryNewPin">New 6-Digit PIN (000000–999999)</label>
+          <input type="password" id="recoveryNewPin" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" autocomplete="off" inputmode="numeric">
+        </div>
+        <button id="btnRecoverVault" class="btn btn-warning btn-block">Recover Vault & Reset Credentials</button>
       </div>
 
       <div id="authError" class="alert-box error hidden"></div>

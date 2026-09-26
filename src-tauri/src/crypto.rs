@@ -49,15 +49,42 @@ pub struct KeySlot {
     pub encrypted_mek: Vec<u8>, // AES-256-GCM ciphertext + 16-byte tag
 }
 
-/// Full Encrypted Vault Container
+/// Full Encrypted Vault Container (Dual-Slot + Emergency Recovery Slot)
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct VaultContainer {
     pub magic: String,
     pub version: u16,
     pub slot_password: KeySlot,
     pub slot_biometric_pin: KeySlot,
+    #[serde(default)]
+    pub slot_recovery_key: Option<KeySlot>, // Slot 3: Emergency Paper Recovery Key
     pub payload_nonce: Vec<u8>,
     pub encrypted_payload: Vec<u8>, // AES-256-GCM ciphertext + 16-byte tag
+}
+
+/// Generate a high-entropy 128-bit Emergency Paper Recovery Key formatted as:
+/// SEC-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX
+pub fn generate_recovery_code() -> String {
+    let mut raw_bytes = [0u8; 16];
+    OsRng.fill_bytes(&mut raw_bytes);
+    let hex_str = raw_bytes
+        .iter()
+        .map(|b| format!("{:02X}", b))
+        .collect::<String>();
+
+    // Chunk into 8 groups of 4 characters
+    let chunks: Vec<&str> = (0..8).map(|i| &hex_str[i * 4..(i + 1) * 4]).collect();
+    format!("SEC-{}", chunks.join("-"))
+}
+
+/// Normalize recovery code by stripping "SEC", hyphens, spaces, and filtering for hex digits
+pub fn normalize_recovery_code(code: &str) -> String {
+    code.trim()
+        .to_uppercase()
+        .replace("SEC", "")
+        .chars()
+        .filter(|c| c.is_ascii_hexdigit())
+        .collect()
 }
 
 /// Derive a 256-bit key using memory-hard Argon2id
@@ -213,5 +240,19 @@ mod tests {
         let c = b"secret_token_456";
         assert!(secure_compare(a, b));
         assert!(!secure_compare(a, c));
+    }
+
+    #[test]
+    fn test_recovery_code_generation_and_normalization() {
+        let code = generate_recovery_code();
+        assert!(code.starts_with("SEC-"));
+        let normalized = normalize_recovery_code(&code);
+        assert_eq!(normalized.len(), 32);
+        assert!(!normalized.contains('-'));
+        assert!(!normalized.contains("SEC"));
+
+        // User typed lowercase with spaces
+        let user_input = format!("sec-{}", code.to_lowercase().replace('-', " "));
+        assert_eq!(normalize_recovery_code(&user_input), normalized);
     }
 }

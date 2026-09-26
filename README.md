@@ -298,12 +298,15 @@ overflow-checks = true # Enforces runtime panic on arithmetic overflow
   | Step 1: Launch Application                                        |
   |         - Window capture protection turns window black to capture |
   |         - Anti-copy and anti-selection event traps active         |
-  |         - Prompt: Master Password OR Biometrics + 6-Digit PIN     |
+  |         - Prompt: Touch ID + 6-Digit PIN                          |
+  |               OR: Master Password                                 |
+  |               OR: Emergency Paper Recovery Key (Slot 3)           |
   +---------------------------------+---------------------------------+
                                     |
                                     v
   +-------------------------------------------------------------------+
   | Step 2: Authentication Verification                               |
+  |         - Biometric Flow: First scan Touch ID, then punch PIN     |
   |         - Rust derives key via Argon2id (m=64M, t=3, p=4)         |
   |         - AES-256-GCM decrypts Master Encryption Key (MEK)        |
   +---------------------------------+---------------------------------+

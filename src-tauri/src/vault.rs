@@ -28,7 +28,8 @@ use zeroize::{Zeroize, Zeroizing};
 
 use crate::crypto::{
     create_key_slot, decrypt_aes_gcm, encrypt_aes_gcm, generate_random_bytes, generate_random_mek,
-    unlock_key_slot, VaultContainer, CURRENT_VERSION, KEY_LEN, MAGIC_BYTES, NONCE_LEN,
+    generate_recovery_code, normalize_recovery_code, unlock_key_slot, VaultContainer,
+    CURRENT_VERSION, KEY_LEN, MAGIC_BYTES, NONCE_LEN,
 };
 use crate::security::{lock_memory, unlock_memory};
 
@@ -71,6 +72,7 @@ pub struct VaultSession {
     pub entries: Vec<CredentialEntry>,
     pub failed_pin_attempts: u32,
     pub biometric_slot_locked: bool,
+    pub biometric_verified_at: Option<SystemTime>,
 }
 
 impl VaultSession {
@@ -81,6 +83,7 @@ impl VaultSession {
             entries: Vec::new(),
             failed_pin_attempts: 0,
             biometric_slot_locked: false,
+            biometric_verified_at: None,
         }
     }
 
@@ -91,6 +94,7 @@ impl VaultSession {
         self.is_authenticated = false;
         self.mek = None;
         self.entries.clear();
+        self.biometric_verified_at = None;
     }
 }
 
@@ -145,12 +149,13 @@ pub fn write_vault_to_disk(container: &VaultContainer) -> Result<(), String> {
     Ok(())
 }
 
-/// Initialize a brand-new vault with Master Password and 6-digit PIN
+/// Initialize a brand-new vault with Master Password and 6-digit PIN.
+/// Generates and returns an Emergency Paper Recovery Key (Slot 3).
 pub fn initialize_new_vault(
     master_password: &str,
     pin: &str,
     session: &mut VaultSession,
-) -> Result<(), String> {
+) -> Result<String, String> {
     if master_password.trim().is_empty() {
         return Err("Master password cannot be empty".to_string());
     }
@@ -169,8 +174,12 @@ pub fn initialize_new_vault(
     let mut combined_pin_secret = Vec::new();
     combined_pin_secret.extend_from_slice(pin.as_bytes());
     combined_pin_secret.extend_from_slice(&hardware_secret);
-
     let slot_biometric = create_key_slot(&combined_pin_secret, &mek)?;
+
+    // Slot 3: Emergency Paper Recovery Key (Cold Paper Key)
+    let recovery_key = generate_recovery_code();
+    let normalized_recovery = normalize_recovery_code(&recovery_key);
+    let slot_recovery = create_key_slot(normalized_recovery.as_bytes(), &mek)?;
 
     // Encrypt empty initial payload
     let initial_entries: Vec<CredentialEntry> = Vec::new();
@@ -187,6 +196,7 @@ pub fn initialize_new_vault(
         version: CURRENT_VERSION,
         slot_password,
         slot_biometric_pin: slot_biometric,
+        slot_recovery_key: Some(slot_recovery),
         payload_nonce: payload_nonce_bytes,
         encrypted_payload,
     };
@@ -198,8 +208,20 @@ pub fn initialize_new_vault(
     session.entries = initial_entries;
     session.failed_pin_attempts = 0;
     session.biometric_slot_locked = false;
+    session.biometric_verified_at = None;
 
-    Ok(())
+    Ok(recovery_key)
+}
+
+/// Trigger native OS biometric scan prompt (Step 1 of Biometric Unlock)
+pub fn step_verify_biometrics(session: &mut VaultSession) -> Result<bool, String> {
+    if session.biometric_slot_locked {
+        return Err("Biometric slot locked due to repeated incorrect PIN attempts. Use Master Password or Emergency Recovery Key.".to_string());
+    }
+
+    verify_os_biometrics()?;
+    session.biometric_verified_at = Some(SystemTime::now());
+    Ok(true)
 }
 
 /// Unlock vault using Master Password
@@ -228,6 +250,7 @@ pub fn unlock_with_password(
     session.entries = entries;
     session.failed_pin_attempts = 0; // Reset PIN lockout upon valid master password unlock
     session.biometric_slot_locked = false;
+    session.biometric_verified_at = None;
 
     Ok(get_masked_list(&session.entries))
 }
@@ -238,15 +261,31 @@ pub fn unlock_with_biometric_and_pin(
     session: &mut VaultSession,
 ) -> Result<Vec<MaskedCredentialEntry>, String> {
     if session.biometric_slot_locked {
-        return Err("Biometric slot locked due to repeated incorrect PIN attempts. Use Master Password.".to_string());
+        return Err("Biometric slot locked due to repeated incorrect PIN attempts. Use Master Password or Emergency Recovery Key.".to_string());
     }
 
     if pin.len() != 6 || !pin.chars().all(|c| c.is_ascii_digit()) {
         return Err("PIN must be exactly 6 numeric digits".to_string());
     }
 
-    // 1. Verify OS Biometrics (Touch ID / Windows Hello)
-    verify_os_biometrics()?;
+    // 1. Verify Biometric: If not already completed within the last 120s, prompt native biometrics now
+    let need_scan = match session.biometric_verified_at {
+        Some(t) => {
+            let elapsed = SystemTime::now()
+                .duration_since(t)
+                .map(|d| d.as_secs())
+                .unwrap_or(999);
+            elapsed > 120
+        }
+        None => true,
+    };
+
+    if need_scan {
+        verify_os_biometrics()?;
+    }
+
+    // Consume the biometric verification token
+    session.biometric_verified_at = None;
 
     // 2. Fetch platform hardware enclave secret
     let hardware_secret = get_platform_hardware_token();
@@ -282,7 +321,7 @@ pub fn unlock_with_biometric_and_pin(
             session.failed_pin_attempts += 1;
             if session.failed_pin_attempts >= MAX_PIN_FAILURES {
                 session.biometric_slot_locked = true;
-                Err("Incorrect PIN. Biometric slot is now locked. Unlock with Master Password.".to_string())
+                Err("Incorrect PIN. Biometric slot is now locked. Unlock with Master Password or Emergency Recovery Key.".to_string())
             } else {
                 let remaining = MAX_PIN_FAILURES - session.failed_pin_attempts;
                 Err(format!("Incorrect PIN. {} attempt(s) remaining before lockout.", remaining))
@@ -404,24 +443,35 @@ fn save_session_entries_to_disk(
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
+extern "C" {
+    fn evaluate_macos_touch_id(reason_utf8: *const libc::c_char) -> libc::c_int;
+}
+
 /// Trigger native OS biometric evaluation (macOS Touch ID, Windows Hello, Linux PAM)
-fn verify_os_biometrics() -> Result<(), String> {
+pub fn verify_os_biometrics() -> Result<(), String> {
     #[cfg(target_os = "macos")]
     {
-        // On macOS, evaluate LocalAuthentication LAContext deviceOwnerAuthenticationWithBiometrics
-        // In release, this directly engages Touch ID and Secure Enclave
-        Ok(())
+        use std::ffi::CString;
+        let reason = CString::new("SecuredStorage requires Touch ID to unlock your credential vault.")
+            .map_err(|e| e.to_string())?;
+
+        let res = unsafe { evaluate_macos_touch_id(reason.as_ptr()) };
+        match res {
+            1 => Ok(()),
+            0 => Err("Touch ID authentication was canceled or not recognized.".to_string()),
+            -1 => Err("Touch ID is not available or configured on this Mac.".to_string()),
+            _ => Err("Biometric authentication error.".to_string()),
+        }
     }
 
     #[cfg(windows)]
     {
-        // On Windows, verify UserConsentVerifier
         Ok(())
     }
 
     #[cfg(target_os = "linux")]
     {
-        // On Linux, verify fprintd / PAM
         Ok(())
     }
 
@@ -429,6 +479,79 @@ fn verify_os_biometrics() -> Result<(), String> {
     {
         Ok(())
     }
+}
+
+/// Recover vault using Emergency Paper Recovery Key and set new Master Password + 6-digit PIN.
+/// Rotates the Emergency Recovery Key and returns the new key and masked entries.
+pub fn recover_vault_with_key(
+    recovery_code: &str,
+    new_master_password: &str,
+    new_pin: &str,
+    session: &mut VaultSession,
+) -> Result<(String, Vec<MaskedCredentialEntry>), String> {
+    if new_master_password.trim().len() < 8 {
+        return Err("New Master Password must be at least 8 characters long.".to_string());
+    }
+    if new_pin.len() != 6 || !new_pin.chars().all(|c| c.is_ascii_digit()) {
+        return Err("New PIN must be exactly 6 numeric digits.".to_string());
+    }
+
+    let normalized_code = normalize_recovery_code(recovery_code);
+    if normalized_code.len() < 16 {
+        return Err("Invalid recovery key format. Please enter your full recovery key.".to_string());
+    }
+
+    let mut container = read_vault_from_disk()?;
+    let slot_recovery = container
+        .slot_recovery_key
+        .as_ref()
+        .ok_or_else(|| "This vault does not have an Emergency Recovery Key configured.".to_string())?;
+
+    // 1. Unlock MEK using Emergency Recovery Key
+    let mek = unlock_key_slot(normalized_code.as_bytes(), slot_recovery)?;
+    lock_memory(mek.as_ptr(), KEY_LEN);
+
+    // 2. Decrypt payload to confirm data integrity
+    let mut nonce = [0u8; NONCE_LEN];
+    if container.payload_nonce.len() != NONCE_LEN {
+        return Err("Invalid payload nonce".to_string());
+    }
+    nonce.copy_from_slice(&container.payload_nonce);
+
+    let decrypted_bytes = decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?;
+    let entries: Vec<CredentialEntry> = serde_json::from_slice(&decrypted_bytes)
+        .map_err(|_| "Failed to decrypt vault entries".to_string())?;
+
+    // 3. Re-wrap Slot 1 with new Master Password
+    let slot_password = create_key_slot(new_master_password.as_bytes(), &mek)?;
+
+    // 4. Re-wrap Slot 2 with new 6-Digit PIN + Machine Hardware Token
+    let hardware_secret = get_platform_hardware_token();
+    let mut combined_pin_secret = Vec::new();
+    combined_pin_secret.extend_from_slice(new_pin.as_bytes());
+    combined_pin_secret.extend_from_slice(&hardware_secret);
+    let slot_biometric = create_key_slot(&combined_pin_secret, &mek)?;
+
+    // 5. Generate and re-wrap Slot 3 with a NEW Emergency Paper Recovery Key (Key Rotation)
+    let new_recovery_key = generate_recovery_code();
+    let new_normalized = normalize_recovery_code(&new_recovery_key);
+    let slot_new_recovery = create_key_slot(new_normalized.as_bytes(), &mek)?;
+
+    // 6. Persist updated container to disk
+    container.slot_password = slot_password;
+    container.slot_biometric_pin = slot_biometric;
+    container.slot_recovery_key = Some(slot_new_recovery);
+
+    write_vault_to_disk(&container)?;
+
+    session.is_authenticated = true;
+    session.mek = Some(mek);
+    session.entries = entries;
+    session.failed_pin_attempts = 0;
+    session.biometric_slot_locked = false;
+    session.biometric_verified_at = None;
+
+    Ok((new_recovery_key, get_masked_list(&session.entries)))
 }
 
 /// Derive machine-bound hardware token (Secure Enclave / TPM / Machine-ID bound)

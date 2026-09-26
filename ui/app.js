@@ -63,7 +63,23 @@ async function mockBackendHandler(command, args) {
   if (command === 'initialize_vault') {
     mockVaultCreated = true;
     mockEntries = [];
-    return "OK";
+    return "SEC-9F2A-8C31-E04D-2B5C-681E-A9F0-713B-4D8E";
+  }
+  if (command === 'trigger_biometric_scan') {
+    return true;
+  }
+  if (command === 'recover_vault') {
+    return {
+      new_recovery_key: "SEC-B2C3-D4E5-F6A7-8901-2345-6789-0ABC",
+      entries: mockEntries.map(e => ({
+        id: e.id,
+        website: e.website,
+        application: '••••••••••••',
+        username: '••••••••••••',
+        password: '••••••••••••',
+        notes: '••••••••••••'
+      }))
+    };
   }
   if (command === 'unlock_vault_password' || command === 'unlock_vault_biometric') {
     return mockEntries.map(e => ({
@@ -123,19 +139,37 @@ const searchInput = document.getElementById('searchInput');
 // Auth Screen Elements
 const tabBio = document.getElementById('tabBio');
 const tabPassword = document.getElementById('tabPassword');
+const tabRecovery = document.getElementById('tabRecovery');
 const bioAuthTab = document.getElementById('bioAuthTab');
 const passwordAuthTab = document.getElementById('passwordAuthTab');
+const recoveryAuthTab = document.getElementById('recoveryAuthTab');
+
+// Biometric Two-Step Elements
+const bioStep1 = document.getElementById('bioStep1');
+const bioStep2 = document.getElementById('bioStep2');
+const btnScanTouchID = document.getElementById('btnScanTouchID');
+const btnReScanBio = document.getElementById('btnReScanBio');
 const bioPin = document.getElementById('bioPin');
 const authPassword = document.getElementById('authPassword');
 const btnBioUnlock = document.getElementById('btnBioUnlock');
 const btnPasswordUnlock = document.getElementById('btnPasswordUnlock');
 const authError = document.getElementById('authError');
 
-// Init Screen Elements
+// Recovery Elements
+const recoveryInputKey = document.getElementById('recoveryInputKey');
+const recoveryNewPassword = document.getElementById('recoveryNewPassword');
+const recoveryNewPin = document.getElementById('recoveryNewPin');
+const btnRecoverVault = document.getElementById('btnRecoverVault');
+
+// Init & Emergency Recovery Key Elements
 const initPassword = document.getElementById('initPassword');
 const initPin = document.getElementById('initPin');
 const btnCreateVault = document.getElementById('btnCreateVault');
 const initError = document.getElementById('initError');
+const recoveryKeyScreen = document.getElementById('recoveryKeyScreen');
+const displayRecoveryKey = document.getElementById('displayRecoveryKey');
+const chkSavedRecoveryKey = document.getElementById('chkSavedRecoveryKey');
+const btnConfirmRecoveryKey = document.getElementById('btnConfirmRecoveryKey');
 
 // Modal Elements
 const addModal = document.getElementById('addModal');
@@ -202,19 +236,62 @@ async function initApp() {
   }
 }
 
+function resetBioSteps() {
+  if (bioStep1 && bioStep2) {
+    bioStep1.classList.remove('hidden');
+    bioStep2.classList.add('hidden');
+  }
+  if (btnScanTouchID) {
+    btnScanTouchID.disabled = false;
+    btnScanTouchID.innerHTML = '<span>Scan Touch ID / Biometrics</span>';
+  }
+  if (bioPin) {
+    bioPin.value = '';
+  }
+}
+
+function switchTab(target) {
+  tabBio.classList.remove('active');
+  tabPassword.classList.remove('active');
+  if (tabRecovery) tabRecovery.classList.remove('active');
+
+  bioAuthTab.classList.add('hidden');
+  passwordAuthTab.classList.add('hidden');
+  if (recoveryAuthTab) recoveryAuthTab.classList.add('hidden');
+  hideError(authError);
+
+  if (target === 'bio') {
+    tabBio.classList.add('active');
+    bioAuthTab.classList.remove('hidden');
+    resetBioSteps();
+  } else if (target === 'password') {
+    tabPassword.classList.add('active');
+    passwordAuthTab.classList.remove('hidden');
+    if (authPassword) authPassword.focus();
+  } else if (target === 'recovery') {
+    if (tabRecovery) tabRecovery.classList.add('active');
+    if (recoveryAuthTab) recoveryAuthTab.classList.remove('hidden');
+    if (recoveryInputKey) recoveryInputKey.focus();
+  }
+}
+
 function showScreen(name) {
   initScreen.classList.add('hidden');
+  if (recoveryKeyScreen) recoveryKeyScreen.classList.add('hidden');
   authScreen.classList.add('hidden');
   vaultScreen.classList.add('hidden');
   headerActions.classList.add('hidden');
 
   if (name === 'init') {
     initScreen.classList.remove('hidden');
+  } else if (name === 'recoveryKey') {
+    if (recoveryKeyScreen) recoveryKeyScreen.classList.remove('hidden');
   } else if (name === 'auth') {
     authScreen.classList.remove('hidden');
     bioPin.value = '';
     authPassword.value = '';
     hideError(authError);
+    switchTab('bio');
   } else if (name === 'vault') {
     vaultScreen.classList.remove('hidden');
     headerActions.classList.remove('hidden');
@@ -242,24 +319,74 @@ window.addEventListener('blur', () => {
   }
 });
 
-// Tab Navigation
-tabBio.addEventListener('click', () => {
-  tabBio.classList.add('active');
-  tabPassword.classList.remove('active');
-  bioAuthTab.classList.remove('hidden');
-  passwordAuthTab.classList.add('hidden');
-  hideError(authError);
+// Tab Navigation Event Listeners
+tabBio.addEventListener('click', () => switchTab('bio'));
+tabPassword.addEventListener('click', () => switchTab('password'));
+if (tabRecovery) tabRecovery.addEventListener('click', () => switchTab('recovery'));
+
+// Step 1: Scan Touch ID / Biometrics
+if (btnScanTouchID) {
+  btnScanTouchID.addEventListener('click', async () => {
+    hideError(authError);
+    btnScanTouchID.disabled = true;
+    btnScanTouchID.innerHTML = '<span>Scanning Touch ID... (touch sensor now)</span>';
+
+    try {
+      await invokeCommand('trigger_biometric_scan');
+      // Biometric Verified: Transition to Step 2 (enter 6-digit PIN)
+      bioStep1.classList.add('hidden');
+      bioStep2.classList.remove('hidden');
+      bioPin.value = '';
+      bioPin.focus();
+    } catch (err) {
+      showError(authError, err.toString());
+      resetBioSteps();
+    }
+  });
+}
+
+if (btnReScanBio) {
+  btnReScanBio.addEventListener('click', () => {
+    resetBioSteps();
+    hideError(authError);
+  });
+}
+
+// Step 2: Unlock with 6-Digit PIN
+btnBioUnlock.addEventListener('click', async () => {
+  const pin = bioPin.value;
+  if (!pin || pin.length !== 6 || !/^\d{6}$/.test(pin)) {
+    showError(authError, 'Please enter your 6-digit numeric PIN.');
+    bioPin.focus();
+    return;
+  }
+
+  btnBioUnlock.disabled = true;
+  btnBioUnlock.textContent = 'Decrypting...';
+
+  try {
+    const entries = await invokeCommand('unlock_vault_biometric', { pin });
+    currentEntries = entries;
+    renderVaultTable(entries);
+    showScreen('vault');
+  } catch (err) {
+    showError(authError, err.toString());
+    bioPin.value = '';
+    bioPin.focus();
+  } finally {
+    btnBioUnlock.disabled = false;
+    btnBioUnlock.textContent = 'Decrypt & Unlock Vault';
+  }
 });
 
-tabPassword.addEventListener('click', () => {
-  tabPassword.classList.add('active');
-  tabBio.classList.remove('active');
-  passwordAuthTab.classList.remove('hidden');
-  bioAuthTab.classList.add('hidden');
-  hideError(authError);
+// Auto-submit PIN when 6 digits are typed
+bioPin.addEventListener('input', () => {
+  if (bioPin.value.length === 6 && /^\d{6}$/.test(bioPin.value)) {
+    btnBioUnlock.click();
+  }
 });
 
-// Create Vault
+// Create Vault: Generates Emergency Paper Recovery Key (Slot 3)
 btnCreateVault.addEventListener('click', async () => {
   const password = initPassword.value;
   const pin = initPin.value;
@@ -273,35 +400,96 @@ btnCreateVault.addEventListener('click', async () => {
     return;
   }
 
+  btnCreateVault.disabled = true;
+  btnCreateVault.textContent = 'Deriving Keys & Encrypting...';
+
   try {
-    await invokeCommand('initialize_vault', { masterPassword: password, pin });
+    const recoveryKey = await invokeCommand('initialize_vault', { masterPassword: password, pin });
     initPassword.value = '';
     initPin.value = '';
+    hideError(initError);
+
+    // Display Emergency Recovery Key
+    displayRecoveryKey.textContent = recoveryKey;
+    chkSavedRecoveryKey.checked = false;
+    btnConfirmRecoveryKey.disabled = true;
+    showScreen('recoveryKey');
+  } catch (err) {
+    showError(initError, err.toString());
+  } finally {
+    btnCreateVault.disabled = false;
+    btnCreateVault.textContent = 'Encrypt & Create Vault';
+  }
+});
+
+if (chkSavedRecoveryKey) {
+  chkSavedRecoveryKey.addEventListener('change', () => {
+    btnConfirmRecoveryKey.disabled = !chkSavedRecoveryKey.checked;
+  });
+}
+
+if (btnConfirmRecoveryKey) {
+  btnConfirmRecoveryKey.addEventListener('click', () => {
     currentEntries = [];
     renderVaultTable([]);
     showScreen('vault');
-  } catch (err) {
-    showError(initError, err.toString());
-  }
-});
+  });
+}
 
-// Unlock with Biometric + 6-Digit PIN
-btnBioUnlock.addEventListener('click', async () => {
-  const pin = bioPin.value;
-  if (!pin || pin.length !== 6 || !/^\d{6}$/.test(pin)) {
-    showError(authError, 'Please enter your 6-digit numeric PIN.');
-    return;
-  }
+// Recover Vault using Emergency Paper Recovery Key
+if (btnRecoverVault) {
+  btnRecoverVault.addEventListener('click', async () => {
+    const recoveryKey = (recoveryInputKey.value || '').trim();
+    const newPassword = recoveryNewPassword.value;
+    const newPin = recoveryNewPin.value;
 
-  try {
-    const entries = await invokeCommand('unlock_vault_biometric', { pin });
-    currentEntries = entries;
-    renderVaultTable(entries);
-    showScreen('vault');
-  } catch (err) {
-    showError(authError, err.toString());
-  }
-});
+    if (!recoveryKey || recoveryKey.length < 16) {
+      showError(authError, 'Please enter your complete Emergency Paper Recovery Key.');
+      return;
+    }
+    if (!newPassword || newPassword.length < 8) {
+      showError(authError, 'New Master Password must be at least 8 characters long.');
+      return;
+    }
+    if (!newPin || newPin.length !== 6 || !/^\d{6}$/.test(newPin)) {
+      showError(authError, 'New PIN must be exactly 6 numeric digits (000000–999999).');
+      return;
+    }
+
+    btnRecoverVault.disabled = true;
+    btnRecoverVault.textContent = 'Recovering & Rotating Keys...';
+
+    try {
+      const res = await invokeCommand('recover_vault', {
+        recoveryKey,
+        newPassword,
+        newPin
+      });
+
+      recoveryInputKey.value = '';
+      recoveryNewPassword.value = '';
+      recoveryNewPin.value = '';
+
+      // Present the rotated new recovery key
+      displayRecoveryKey.textContent = res.new_recovery_key;
+      chkSavedRecoveryKey.checked = false;
+      btnConfirmRecoveryKey.disabled = true;
+      currentEntries = res.entries;
+
+      btnConfirmRecoveryKey.onclick = () => {
+        renderVaultTable(currentEntries);
+        showScreen('vault');
+      };
+
+      showScreen('recoveryKey');
+    } catch (err) {
+      showError(authError, err.toString());
+    } finally {
+      btnRecoverVault.disabled = false;
+      btnRecoverVault.textContent = 'Recover Vault & Reset Credentials';
+    }
+  });
+}
 
 // Unlock with Master Password
 btnPasswordUnlock.addEventListener('click', async () => {
@@ -311,6 +499,9 @@ btnPasswordUnlock.addEventListener('click', async () => {
     return;
   }
 
+  btnPasswordUnlock.disabled = true;
+  btnPasswordUnlock.textContent = 'Verifying Password...';
+
   try {
     const entries = await invokeCommand('unlock_vault_password', { password });
     currentEntries = entries;
@@ -318,6 +509,9 @@ btnPasswordUnlock.addEventListener('click', async () => {
     showScreen('vault');
   } catch (err) {
     showError(authError, err.toString());
+  } finally {
+    btnPasswordUnlock.disabled = false;
+    btnPasswordUnlock.textContent = 'Unlock with Password';
   }
 });
 
