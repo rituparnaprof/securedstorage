@@ -43,12 +43,12 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install Tauri CLI (Precompiled)
-        run: npm install -g @tauri-apps/cli@^2.0.0
+      - name: Install Tauri CLI (Latest Precompiled)
+        run: npm install -g @tauri-apps/cli@latest
 
       - name: Build Tauri Binary
         working-directory: ./src-tauri
-        run: npx @tauri-apps/cli build
+        run: tauri build
 
       - name: Prepare Windows Standalone Portable Binary
         if: matrix.platform == 'windows-latest'

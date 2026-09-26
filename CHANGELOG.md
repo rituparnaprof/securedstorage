@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.5] - 2026-09-26
+
+### Upgraded
+- **Dependencies Audit & Modernization**:
+  - Added `package.json` locking official `@tauri-apps/api@^2.1.1` and `@tauri-apps/cli@^2.1.0`.
+  - Configured CI compiler to use `@tauri-apps/cli@latest` to always build against the latest stable Tauri runtime.
+  - Enhanced JavaScript IPC bridge to support all current and future Tauri v2 invocations (`window.__TAURI__.core.invoke`).
+
+---
+
 ## [1.0.4] - 2026-09-26
 
 ### Optimized

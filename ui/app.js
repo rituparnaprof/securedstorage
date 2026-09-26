@@ -21,12 +21,16 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Tauri IPC wrapper with fallback detection
-const tauri = window.__TAURI__ ? window.__TAURI__.core : null;
+// Tauri IPC wrapper with fallback detection for latest Tauri v2
+const tauriInvoke = (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === 'function')
+  ? window.__TAURI__.core.invoke
+  : (window.__TAURI__ && typeof window.__TAURI__.invoke === 'function')
+    ? window.__TAURI__.invoke
+    : null;
 
 async function invokeCommand(command, args = {}) {
-  if (tauri && typeof tauri.invoke === 'function') {
-    return await tauri.invoke(command, args);
+  if (typeof tauriInvoke === 'function') {
+    return await tauriInvoke(command, args);
   }
   // If running in development browser preview without Tauri backend
   console.warn(`[SecuredStorage] Running in standalone webview preview for: ${command}`);
