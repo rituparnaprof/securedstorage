@@ -178,7 +178,6 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 const cancelModalBtn = document.getElementById('cancelModalBtn');
 const saveCredentialBtn = document.getElementById('saveCredentialBtn');
 const btnGeneratePass = document.getElementById('btnGeneratePass');
-const modalApp = document.getElementById('modalApp');
 const modalWebsite = document.getElementById('modalWebsite');
 const modalUser = document.getElementById('modalUser');
 const modalPass = document.getElementById('modalPass');
@@ -250,6 +249,36 @@ function resetBioSteps() {
   }
 }
 
+let isScanningBiometric = false;
+
+async function autoTriggerBiometric() {
+  if (isScanningBiometric) return;
+  if (authScreen.classList.contains('hidden')) return;
+  if (bioAuthTab.classList.contains('hidden')) return;
+  if (!bioStep1 || bioStep1.classList.contains('hidden')) return;
+
+  isScanningBiometric = true;
+  hideError(authError);
+  if (btnScanTouchID) {
+    btnScanTouchID.disabled = true;
+    btnScanTouchID.innerHTML = '<span>Scanning Biometric... (touch sensor now)</span>';
+  }
+
+  try {
+    await invokeCommand('trigger_biometric_scan');
+    // Biometric Verified: Immediately transition to Step 2 (enter 6-digit PIN)
+    bioStep1.classList.add('hidden');
+    bioStep2.classList.remove('hidden');
+    bioPin.value = '';
+    bioPin.focus();
+  } catch (err) {
+    showError(authError, err.toString());
+    resetBioSteps();
+  } finally {
+    isScanningBiometric = false;
+  }
+}
+
 function switchTab(target) {
   tabBio.classList.remove('active');
   tabPassword.classList.remove('active');
@@ -264,6 +293,10 @@ function switchTab(target) {
     tabBio.classList.add('active');
     bioAuthTab.classList.remove('hidden');
     resetBioSteps();
+    // Auto-trigger native biometrics (Touch ID / Hello / PAM) immediately!
+    setTimeout(() => {
+      autoTriggerBiometric();
+    }, 250);
   } else if (target === 'password') {
     tabPassword.classList.add('active');
     passwordAuthTab.classList.remove('hidden');
@@ -324,31 +357,16 @@ tabBio.addEventListener('click', () => switchTab('bio'));
 tabPassword.addEventListener('click', () => switchTab('password'));
 if (tabRecovery) tabRecovery.addEventListener('click', () => switchTab('recovery'));
 
-// Step 1: Scan Touch ID / Biometrics
+// Step 1: Scan Touch ID / Biometrics button listener
 if (btnScanTouchID) {
-  btnScanTouchID.addEventListener('click', async () => {
-    hideError(authError);
-    btnScanTouchID.disabled = true;
-    btnScanTouchID.innerHTML = '<span>Scanning Touch ID... (touch sensor now)</span>';
-
-    try {
-      await invokeCommand('trigger_biometric_scan');
-      // Biometric Verified: Transition to Step 2 (enter 6-digit PIN)
-      bioStep1.classList.add('hidden');
-      bioStep2.classList.remove('hidden');
-      bioPin.value = '';
-      bioPin.focus();
-    } catch (err) {
-      showError(authError, err.toString());
-      resetBioSteps();
-    }
-  });
+  btnScanTouchID.addEventListener('click', autoTriggerBiometric);
 }
 
 if (btnReScanBio) {
   btnReScanBio.addEventListener('click', () => {
     resetBioSteps();
     hideError(authError);
+    autoTriggerBiometric();
   });
 }
 
@@ -527,7 +545,7 @@ async function handleLockVault() {
 }
 lockVaultBtn.addEventListener('click', handleLockVault);
 
-// Render Vault Table: STRICT MASKING (Website is visible; all other fields are ••••••••••••)
+// Render Vault Table: STRICT MASKING (Site is visible; all other fields are ••••••••••••)
 function renderVaultTable(entries) {
   vaultTableBody.innerHTML = '';
   const filter = (searchInput.value || '').toLowerCase().trim();
@@ -546,18 +564,11 @@ function renderVaultTable(entries) {
     const tr = document.createElement('tr');
     tr.id = `row-${entry.id}`;
 
-    // Website (Plaintext visible)
+    // Site (Plaintext visible)
     const tdWeb = document.createElement('td');
     tdWeb.className = 'website-cell';
-    tdWeb.textContent = entry.website || '(No Website)';
+    tdWeb.textContent = entry.website || '(No Site)';
     tr.appendChild(tdWeb);
-
-    // Application (Masked)
-    const tdApp = document.createElement('td');
-    tdApp.id = `cell-app-${entry.id}`;
-    tdApp.className = 'masked-cell';
-    tdApp.textContent = '••••••••••••';
-    tr.appendChild(tdApp);
 
     // Username (Masked)
     const tdUser = document.createElement('td');
@@ -609,7 +620,7 @@ searchInput.addEventListener('input', () => {
   renderVaultTable(currentEntries);
 });
 
-// Ephemeral Reveal: Unmasks App, Username, Password, Notes for 10 seconds only
+// Ephemeral Reveal: Unmasks Username, Password, Notes for 10 seconds only
 async function handleEphemeralReveal(entryId) {
   if (unmaskTimers[entryId]) {
     clearTimeout(unmaskTimers[entryId]);
@@ -619,19 +630,16 @@ async function handleEphemeralReveal(entryId) {
   }
 
   try {
-    const [appVal, userVal, passVal, notesVal] = await Promise.all([
-      invokeCommand('reveal_field', { entryId, fieldName: 'application' }),
+    const [userVal, passVal, notesVal] = await Promise.all([
       invokeCommand('reveal_field', { entryId, fieldName: 'username' }),
       invokeCommand('reveal_field', { entryId, fieldName: 'password' }),
       invokeCommand('reveal_field', { entryId, fieldName: 'notes' })
     ]);
 
-    const cellApp = document.getElementById(`cell-app-${entryId}`);
     const cellUser = document.getElementById(`cell-user-${entryId}`);
     const cellPass = document.getElementById(`cell-pass-${entryId}`);
     const cellNotes = document.getElementById(`cell-notes-${entryId}`);
 
-    if (cellApp) { cellApp.textContent = appVal; cellApp.className = 'unmasked-cell'; }
     if (cellUser) { cellUser.textContent = userVal; cellUser.className = 'unmasked-cell'; }
     if (cellPass) { cellPass.textContent = passVal; cellPass.className = 'unmasked-cell'; }
     if (cellNotes) { cellNotes.textContent = notesVal || '(None)'; cellNotes.className = 'unmasked-cell'; }
@@ -648,12 +656,10 @@ async function handleEphemeralReveal(entryId) {
 }
 
 function remaskRow(entryId) {
-  const cellApp = document.getElementById(`cell-app-${entryId}`);
   const cellUser = document.getElementById(`cell-user-${entryId}`);
   const cellPass = document.getElementById(`cell-pass-${entryId}`);
   const cellNotes = document.getElementById(`cell-notes-${entryId}`);
 
-  if (cellApp) { cellApp.textContent = '••••••••••••'; cellApp.className = 'masked-cell'; }
   if (cellUser) { cellUser.textContent = '••••••••••••'; cellUser.className = 'masked-cell'; }
   if (cellPass) { cellPass.textContent = '••••••••••••'; cellPass.className = 'masked-cell'; }
   if (cellNotes) { cellNotes.textContent = '••••••••••••'; cellNotes.className = 'masked-cell'; }
@@ -669,7 +675,6 @@ function clearAllUnmaskTimers() {
 
 // Add Credential Modal
 addEntryBtn.addEventListener('click', () => {
-  modalApp.value = '';
   modalWebsite.value = '';
   modalUser.value = '';
   modalPass.value = '';
@@ -696,14 +701,13 @@ btnGeneratePass.addEventListener('click', () => {
 
 // Save Credential
 saveCredentialBtn.addEventListener('click', async () => {
-  const application = modalApp.value.trim();
   const website = modalWebsite.value.trim();
   const username = modalUser.value.trim();
   const password = modalPass.value;
   const notes = modalNotes.value.trim();
 
   if (!website) {
-    showError(modalError, 'Website is required.');
+    showError(modalError, 'Site is required.');
     return;
   }
   if (!password) {
@@ -713,7 +717,7 @@ saveCredentialBtn.addEventListener('click', async () => {
 
   try {
     const updated = await invokeCommand('add_entry', {
-      application,
+      application: '',
       website,
       username,
       password,

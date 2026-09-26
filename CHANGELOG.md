@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.10] - 2026-09-26
+
+### Added
+- **Automated Biometric Trigger & Instant PIN Focus Flow**:
+  - The application now triggers the native biometric prompt (Touch ID on macOS, Windows Hello on Windows, PAM on Linux) automatically upon showing the lock/auth screen, removing the need for manual button clicks.
+  - As soon as the biometric sensor confirms authentication, the UI transitions to Step 2 and immediately autofocused the 6-digit numeric PIN field.
+  - Automatically submits decryption as soon as the 6th digit of the PIN is entered.
+- **WCAG AAA Light Mode Contrast & Theming**:
+  - Added dedicated high-contrast CSS design tokens (`--bg-warning`, `--border-warning`, `--text-warning`, `--bg-recovery`, `--border-recovery`, `--text-recovery`) for Light, Dark, Tint, and Glass modes.
+  - Light mode displays sharp, high-contrast dark amber text (`#78350f` on `#fef3c7` and `#fffbeb`), eliminating illegibility in bright environments.
+- **Streamlined "Site" Credential Schema**:
+  - Completely removed the redundant `Application` field from the "Add Credential" modal and vault entries table.
+  - Renamed `Website` to **`Site`** with clear plain-text guidance (e.g., Google, Banking, AWS, Work Email) rather than requiring full URL syntax.
+  - Adjusted vault table column widths to 5 cleanly aligned columns (`Site`, `Username`, `Password`, `Notes`, `Actions`).
+
 ## [1.0.9] - 2026-09-26
 
 ### Added

@@ -75,7 +75,7 @@
       <div style="text-align: center; margin-bottom: 12px;">
         <span style="font-size: 2.5rem;">📜</span>
         <h2>Emergency Paper Recovery Key</h2>
-        <p class="subtitle" style="color: var(--accent-amber); font-weight: 600;">
+        <p class="subtitle" style="color: var(--text-recovery); font-weight: 600;">
           Physically write down this code on paper and store it in a secure safe!
         </p>
       </div>
@@ -173,7 +173,7 @@
     <section id="vaultScreen" class="vault-card hidden">
       <div class="vault-controls">
         <div class="search-wrapper">
-          <input type="text" id="searchInput" placeholder="🔍 Search by Website..." autocomplete="off">
+          <input type="text" id="searchInput" placeholder="🔍 Search by Site..." autocomplete="off">
         </div>
         <div class="security-status">
           <span class="status-indicator"></span>
@@ -181,9 +181,9 @@
         </div>
       </div>
 
-      <!-- Notice: Only Website is Visible by Default -->
+      <!-- Notice: Only Site is Visible by Default -->
       <div class="privacy-notice">
-        <span>👁️ Strict Privacy Mode: Only <strong>Website</strong> is visible. All other fields are masked. Click <strong>Reveal</strong> on an entry to view for 10 seconds.</span>
+        <span>👁️ Strict Privacy Mode: Only <strong>Site</strong> is visible. All other fields are masked. Click <strong>Reveal</strong> on an entry to view for 10 seconds.</span>
       </div>
 
       <!-- Entries Table -->
@@ -191,12 +191,11 @@
         <table class="vault-table">
           <thead>
             <tr>
-              <th style="width: 25%;">Website</th>
-              <th style="width: 18%;">Application</th>
-              <th style="width: 18%;">Username</th>
-              <th style="width: 18%;">Password</th>
-              <th style="width: 13%;">Notes</th>
-              <th style="width: 8%;">Actions</th>
+              <th style="width: 28%;">Site</th>
+              <th style="width: 24%;">Username</th>
+              <th style="width: 24%;">Password</th>
+              <th style="width: 14%;">Notes</th>
+              <th style="width: 10%;">Actions</th>
             </tr>
           </thead>
           <tbody id="vaultTableBody">
@@ -221,12 +220,9 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="modalApp">Application</label>
-          <input type="text" id="modalApp" placeholder="e.g. Work VPN, Trading Client, Banking" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="modalWebsite">Website (Visible upon unlock)</label>
-          <input type="text" id="modalWebsite" placeholder="e.g. https://portal.company.com" autocomplete="off">
+          <label for="modalWebsite">Site (Visible upon unlock)</label>
+          <input type="text" id="modalWebsite" placeholder="e.g. Google, Banking, AWS, Work Email" autocomplete="off">
+          <small class="helper-text">Plain text identifier (e.g. service, brand, or portal)</small>
         </div>
         <div class="form-group">
           <label for="modalUser">Username</label>
