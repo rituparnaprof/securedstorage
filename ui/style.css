@@ -608,6 +608,7 @@ textarea:focus {
 
 .vault-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -622,6 +623,9 @@ textarea:focus {
   letter-spacing: 0.5px;
   font-size: 11px;
   border-bottom: 1px solid var(--border-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vault-row {
@@ -638,16 +642,21 @@ textarea:focus {
   vertical-align: middle;
   height: 38px;
   box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .website-cell {
   font-weight: 600;
   color: var(--text-link);
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
 }
 
-.masked-cell {
+.masked-cell, .masked-text {
   font-family: var(--font-mono);
   letter-spacing: 1.5px;
   color: var(--text-dim);
@@ -657,7 +666,7 @@ textarea:focus {
   user-select: none !important;
 }
 
-.unmasked-cell {
+.unmasked-cell, .unmasked-badge {
   font-family: var(--font-mono);
   color: var(--text-main);
   background-color: rgba(245, 158, 11, 0.15);
@@ -666,6 +675,11 @@ textarea:focus {
   border: 1px solid rgba(245, 158, 11, 0.35);
   font-size: 11px;
   display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
   line-height: 1.3;
 }
 

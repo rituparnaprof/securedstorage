@@ -586,23 +586,29 @@ function renderVaultTable(entries) {
 
     // Username (Masked)
     const tdUser = document.createElement('td');
-    tdUser.id = `cell-user-${entry.id}`;
-    tdUser.className = 'masked-cell';
-    tdUser.textContent = '••••••••••••';
+    const spanUser = document.createElement('span');
+    spanUser.id = `cell-user-${entry.id}`;
+    spanUser.className = 'masked-text';
+    spanUser.textContent = '••••••••••••';
+    tdUser.appendChild(spanUser);
     tr.appendChild(tdUser);
 
     // Password (Masked)
     const tdPass = document.createElement('td');
-    tdPass.id = `cell-pass-${entry.id}`;
-    tdPass.className = 'masked-cell';
-    tdPass.textContent = '••••••••••••';
+    const spanPass = document.createElement('span');
+    spanPass.id = `cell-pass-${entry.id}`;
+    spanPass.className = 'masked-text';
+    spanPass.textContent = '••••••••••••';
+    tdPass.appendChild(spanPass);
     tr.appendChild(tdPass);
 
     // Notes (Masked)
     const tdNotes = document.createElement('td');
-    tdNotes.id = `cell-notes-${entry.id}`;
-    tdNotes.className = 'masked-cell';
-    tdNotes.textContent = '••••••••••••';
+    const spanNotes = document.createElement('span');
+    spanNotes.id = `cell-notes-${entry.id}`;
+    spanNotes.className = 'masked-text';
+    spanNotes.textContent = '••••••••••••';
+    tdNotes.appendChild(spanNotes);
     tr.appendChild(tdNotes);
 
     // Actions: Ephemeral Reveal & Delete (Sleek Ghost Micro-Buttons)
@@ -660,9 +666,9 @@ async function handleEphemeralReveal(entryId) {
     const cellNotes = document.getElementById(`cell-notes-${entryId}`);
     const revealBtn = document.getElementById(`btn-reveal-${entryId}`);
 
-    if (cellUser) { cellUser.textContent = userVal; cellUser.className = 'unmasked-cell'; }
-    if (cellPass) { cellPass.textContent = passVal; cellPass.className = 'unmasked-cell'; }
-    if (cellNotes) { cellNotes.textContent = notesVal || '(None)'; cellNotes.className = 'unmasked-cell'; }
+    if (cellUser) { cellUser.textContent = userVal; cellUser.className = 'unmasked-badge'; }
+    if (cellPass) { cellPass.textContent = passVal; cellPass.className = 'unmasked-badge'; }
+    if (cellNotes) { cellNotes.textContent = notesVal || '(None)'; cellNotes.className = 'unmasked-badge'; }
     if (revealBtn) {
       revealBtn.innerHTML = '🔒';
       revealBtn.title = 'Hide fields';
@@ -686,9 +692,9 @@ function remaskRow(entryId) {
   const cellNotes = document.getElementById(`cell-notes-${entryId}`);
   const revealBtn = document.getElementById(`btn-reveal-${entryId}`);
 
-  if (cellUser) { cellUser.textContent = '••••••••••••'; cellUser.className = 'masked-cell'; }
-  if (cellPass) { cellPass.textContent = '••••••••••••'; cellPass.className = 'masked-cell'; }
-  if (cellNotes) { cellNotes.textContent = '••••••••••••'; cellNotes.className = 'masked-cell'; }
+  if (cellUser) { cellUser.textContent = '••••••••••••'; cellUser.className = 'masked-text'; }
+  if (cellPass) { cellPass.textContent = '••••••••••••'; cellPass.className = 'masked-text'; }
+  if (cellNotes) { cellNotes.textContent = '••••••••••••'; cellNotes.className = 'masked-text'; }
   if (revealBtn) {
     revealBtn.innerHTML = '👁️';
     revealBtn.title = 'Reveal fields for 10 seconds';
