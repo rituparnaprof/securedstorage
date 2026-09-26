@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aligned Actions column to the right with refined monospace secret bullets (`••••••••••••`).
 
 ### Fixed
+- **Friction-Free Lock/Unlock Flow (Option 1)**:
+  - Removed aggressive `window.blur` auto-lock event listener which previously locked the vault and repeatedly triggered the Touch ID dialog every time the user switched windows.
+  - Increased inactivity auto-lock timeout to 5 minutes of idle time.
+  - Implemented polite biometric triggering with cancellation guard (`biometricCanceledByUser`) so dismissing Touch ID leaves the user undisturbed with a manual scan button.
 - **Native Biometric IPC Resolution & Zero Touch ID Reuse**:
   - Configured `"withGlobalTauri": true` in `tauri.conf.json`, ensuring `window.__TAURI__.core.invoke` is reliably injected into the webview rather than silently falling back to mock handlers.
   - Enforced `context.touchIDAuthenticationAllowableReuseDuration = 0.0` in `touchid_macos.m` so macOS strictly prompts for a physical biometric sensor touch on every unlock attempt.

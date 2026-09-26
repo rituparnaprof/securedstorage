@@ -139,7 +139,7 @@ async function mockBackendHandler(command, args) {
 let currentEntries = [];
 let unmaskTimers = {};
 let idleTimer = null;
-const IDLE_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes auto-lock
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes inactivity auto-lock
 
 const initScreen = document.getElementById('initScreen');
 const authScreen = document.getElementById('authScreen');
@@ -263,12 +263,16 @@ function resetBioSteps() {
 }
 
 let isScanningBiometric = false;
+let biometricCanceledByUser = false;
 
-async function autoTriggerBiometric() {
+async function triggerBiometric(isUserInitiated = false) {
   if (isScanningBiometric) return;
   if (authScreen.classList.contains('hidden')) return;
   if (bioAuthTab.classList.contains('hidden')) return;
   if (!bioStep1 || bioStep1.classList.contains('hidden')) return;
+
+  // Polite biometric prompt: if user dismissed/canceled Touch ID, don't auto-prompt again
+  if (!isUserInitiated && biometricCanceledByUser) return;
 
   isScanningBiometric = true;
   hideError(authError);
@@ -280,12 +284,20 @@ async function autoTriggerBiometric() {
   try {
     await invokeCommand('trigger_biometric_scan');
     // Biometric Verified: Immediately transition to Step 2 (enter 6-digit PIN)
+    biometricCanceledByUser = false;
     bioStep1.classList.add('hidden');
     bioStep2.classList.remove('hidden');
     bioPin.value = '';
     bioPin.focus();
   } catch (err) {
-    showError(authError, err.toString());
+    const errMsg = err ? err.toString() : '';
+    // If canceled by user or not recognized, keep calm and let user decide when to scan
+    if (errMsg.toLowerCase().includes('cancel') || errMsg.toLowerCase().includes('not recognized')) {
+      biometricCanceledByUser = true;
+      showError(authError, 'Touch ID canceled. Click below to try again or switch to Master Password.');
+    } else {
+      showError(authError, errMsg);
+    }
     resetBioSteps();
   } finally {
     isScanningBiometric = false;
@@ -306,9 +318,9 @@ function switchTab(target) {
     tabBio.classList.add('active');
     bioAuthTab.classList.remove('hidden');
     resetBioSteps();
-    // Auto-trigger native biometrics (Touch ID / Hello / PAM) immediately!
+    // Auto-trigger biometric prompt politely if not canceled
     setTimeout(() => {
-      autoTriggerBiometric();
+      triggerBiometric(false);
     }, 250);
   } else if (target === 'password') {
     tabPassword.classList.add('active');
@@ -344,7 +356,7 @@ function showScreen(name) {
   }
 }
 
-// Inactivity Auto-Lock
+// Inactivity Auto-Lock (5 minutes of idle time)
 function resetIdleTimer() {
   if (idleTimer) clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
@@ -358,28 +370,25 @@ function resetIdleTimer() {
   window.addEventListener(evt, resetIdleTimer, { passive: true });
 });
 
-// Auto-lock on window blur / minimization
-window.addEventListener('blur', () => {
-  if (!vaultScreen.classList.contains('hidden')) {
-    handleLockVault();
-  }
-});
-
 // Tab Navigation Event Listeners
-tabBio.addEventListener('click', () => switchTab('bio'));
+tabBio.addEventListener('click', () => {
+  // If user explicitly clicked the Biometric tab, allow scanning even if previously canceled
+  biometricCanceledByUser = false;
+  switchTab('bio');
+});
 tabPassword.addEventListener('click', () => switchTab('password'));
 if (tabRecovery) tabRecovery.addEventListener('click', () => switchTab('recovery'));
 
 // Step 1: Scan Touch ID / Biometrics button listener
 if (btnScanTouchID) {
-  btnScanTouchID.addEventListener('click', autoTriggerBiometric);
+  btnScanTouchID.addEventListener('click', () => triggerBiometric(true));
 }
 
 if (btnReScanBio) {
   btnReScanBio.addEventListener('click', () => {
     resetBioSteps();
     hideError(authError);
-    autoTriggerBiometric();
+    triggerBiometric(true);
   });
 }
 
@@ -549,6 +558,7 @@ btnPasswordUnlock.addEventListener('click', async () => {
 // Lock Vault
 async function handleLockVault() {
   clearAllUnmaskTimers();
+  biometricCanceledByUser = false;
   try {
     await invokeCommand('lock_vault');
   } catch (e) {}
