@@ -87,10 +87,34 @@ jobs:
             src-tauri/target/release/secured-storage*
           if-no-files-found: warn
 
+      - name: Generate Release Notes from CHANGELOG
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python3 -c "
+          import re, os
+          ver = '$VERSION'
+          notes = ''
+          if os.path.exists('CHANGELOG.md'):
+              with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
+                  text = f.read()
+              m = re.search(rf'## \[{re.escape(ver)}\][^\n]*\n(.*?)(?=\n## \[|\Z)', text, re.DOTALL)
+              if m:
+                  notes = m.group(1).strip()
+          with open('RELEASE_NOTES.md', 'w', encoding='utf-8') as out:
+              if notes:
+                  out.write(notes + '\n')
+              else:
+                  out.write(f'SecuredStorage release v{ver}\n')
+          "
+
       - name: Publish to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: "SecuredStorage ${{ github.ref_name }}"
+          body_path: RELEASE_NOTES.md
           files: |
             standalone/*.exe
             standalone/*.zip
@@ -103,3 +127,4 @@ jobs:
             src-tauri/target/release/bundle/rpm/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

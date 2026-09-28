@@ -5,7 +5,8 @@
   "private": true,
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "release": "./scripts/release.sh"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.1.1"
