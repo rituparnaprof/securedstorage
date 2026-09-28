@@ -1,6 +1,6 @@
 [package]
 name = "secured-storage"
-version = "1.1.0"
+version = "1.2.0"
 description = "Hardened Cross-Platform Offline PQC-Compliant Password Vault"
 authors = ["rituparnaprof"]
 edition = "2021"
