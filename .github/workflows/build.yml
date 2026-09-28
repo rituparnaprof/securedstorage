@@ -2,11 +2,8 @@ name: Build Multi-Platform Binaries
 
 on:
   push:
-    branches: [ main, master ]
     tags:
       - 'v*'
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -63,12 +60,22 @@ jobs:
             cp src-tauri/target/release/secured-storage.exe standalone/SecuredStorage-Windows-Portable.exe
           fi
 
+      - name: Prepare macOS Application Archive
+        if: matrix.platform == 'macos-latest'
+        shell: bash
+        run: |
+          mkdir -p standalone
+          if [ -d "src-tauri/target/release/bundle/macos/SecuredStorage.app" ]; then
+            ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/release/bundle/macos/SecuredStorage.app" "standalone/SecuredStorage-macOS.zip"
+          fi
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SecuredStorage-${{ matrix.platform }}
           path: |
             standalone/*.exe
+            standalone/*.zip
             src-tauri/target/release/bundle/dmg/*.dmg
             src-tauri/target/release/bundle/macos/*.app
             src-tauri/target/release/bundle/msi/*.msi
@@ -86,6 +93,7 @@ jobs:
         with:
           files: |
             standalone/*.exe
+            standalone/*.zip
             src-tauri/target/release/bundle/dmg/*.dmg
             src-tauri/target/release/bundle/macos/*.app
             src-tauri/target/release/bundle/msi/*.msi

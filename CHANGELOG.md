@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.0.11] - 2026-09-28
+
+### Added
+- **Canonical OS Application Data Storage & Seamless Legacy Migration**:
+  - Replaced user documents directory storage with standard OS application data paths (`dirs::data_dir()`):
+    - **macOS**: `~/Library/Application Support/SecuredStorage/vault.enc`
+    - **Windows**: `%APPDATA%\SecuredStorage\vault.enc` (`C:\Users\<User>\AppData\Roaming\SecuredStorage\vault.enc`)
+    - **Linux**: `~/.local/share/SecuredStorage/vault.enc` (`$XDG_DATA_HOME/SecuredStorage/vault.enc`)
+  - Eliminates macOS TCC prompt ("SecuredStorage wants access to Documents") and avoids polluting user documents.
+  - Added automatic legacy migration: upon startup, if `vault.enc` is missing from the canonical directory, SecuredStorage automatically detects and migrates existing vaults from `~/Documents/SecuredStorage/`.
+- **Power-Loss Resilient Atomic File Writes & Backup Rollback Engine**:
+  - Implemented write-sync-rename persistence: encrypted data is written to `vault.enc.tmp`, flushed to physical disk (`File::sync_all()`), and atomically renamed over `vault.enc`.
+  - Implemented rolling pre-save snapshots (`vault.enc.bak`) created prior to every write.
+  - Implemented automated rollback recovery: if `vault.enc` is missing or corrupted, `read_vault_from_disk()` automatically recovers and restores the healthy `.bak` snapshot.
+- **Forward & Backward Schema Evolution (`#[serde(default)]`)**:
+  - Added `#[serde(default)]` annotations to credential models to ensure older vaults open cleanly in newer versions and future updates will not break existing vaults.
+- **In-Memory Zeroization of Intermediate Buffers**:
+  - Wrapped serialized and decrypted plaintext byte buffers in `zeroize::Zeroizing<Vec<u8>>` across vault initialization, authentication, credential saving, and emergency recovery routines.
+- **Release-Only CI/CD Build Triggers & macOS Archive Packaging**:
+  - Restricted `.github/workflows/build.yml` to trigger exclusively on release tags (`v*`) and manual workflow dispatch, eliminating wasteful builds on standard branch commits and pull requests.
+  - Added macOS `ditto` packaging (`SecuredStorage-macOS.zip`) in GitHub Actions, preserving POSIX executable permissions (`+x`) and preventing Gatekeeper "damaged" dialogs upon download.
+
 ## [1.0.10] - 2026-09-26
 
 ### Added

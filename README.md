@@ -221,6 +221,21 @@ Within the AES-256-GCM encrypted payload, entries follow this strict schema:
 ]
 ```
 
+### 3.5 Canonical Storage Locations & Resilience
+
+To avoid polluting the user's personal documents, prevent OS security warnings, and guarantee power-loss resilience, `vault.enc` is persisted to canonical OS application data paths:
+
+| Platform | Canonical Storage Path |
+| :--- | :--- |
+| **macOS** | `~/Library/Application Support/SecuredStorage/vault.enc` |
+| **Windows** | `%APPDATA%\SecuredStorage\vault.enc` (`C:\Users\<User>\AppData\Roaming\SecuredStorage\vault.enc`) |
+| **Linux** | `~/.local/share/SecuredStorage/vault.enc` (`$XDG_DATA_HOME/SecuredStorage/vault.enc`) |
+
+#### Atomic Write & Rollback Engine:
+1. **Pre-Save Snapshot (`vault.enc.bak`)**: Before committing modifications, an immediate copy is taken to guarantee rollback capability.
+2. **Write-Sync-Rename (`vault.enc.tmp`)**: Encrypted bytes are written to a temporary file, flushed directly to physical storage with `File::sync_all()`, and atomically renamed over `vault.enc`. If power is cut mid-write, data integrity is never compromised.
+3. **Seamless Migration**: Upon launch, if a vault is missing from the canonical directory, SecuredStorage automatically scans for legacy vaults in `~/Documents/SecuredStorage/` and migrates them forward without user intervention.
+
 ---
 
 ## 4. Cross-Platform Biometric Hardware Integration
@@ -338,6 +353,22 @@ overflow-checks = true # Enforces runtime panic on arithmetic overflow
   |         - Zeroizes MEK in RAM, purges DOM, returns to Step 1      |
   +-------------------------------------------------------------------+
 ```
+
+---
+
+## 8. Installation & macOS Gatekeeper Note
+
+Because SecuredStorage is open-source and builds are not signed with a paid Apple Developer Program certificate ($99/year), modern macOS (Sonoma & Sequoia) tags downloaded files with `com.apple.quarantine`, causing Finder to warn:
+> *"SecuredStorage is damaged and can't be opened. You should move it to the Bin."*
+
+To open the application:
+1. Open **Terminal** and strip the quarantine flag:
+   ```bash
+   xattr -cr /Applications/SecuredStorage.app
+   ```
+   *(Or if downloaded in Downloads: `xattr -cr ~/Downloads/SecuredStorage.app`)*
+2. Double-click **SecuredStorage.app** to open it immediately.
+3. Alternatively, navigate to **macOS System Settings** → **Privacy & Security** → scroll to **Security** and click **"Open Anyway"**.
 
 ---
 

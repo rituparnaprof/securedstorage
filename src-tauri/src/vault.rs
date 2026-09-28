@@ -41,14 +41,21 @@ const MAX_PIN_FAILURES: u32 = 3;
 #[zeroize(drop)]
 pub struct CredentialEntry {
     pub id: String,
+    #[serde(default)]
     pub application: String,
+    #[serde(default)]
     pub website: String,
+    #[serde(default)]
     pub username: String,
+    #[serde(default)]
     pub password: String,
+    #[serde(default)]
     pub notes: String,
     #[zeroize(skip)]
+    #[serde(default)]
     pub created_at: u64,
     #[zeroize(skip)]
+    #[serde(default)]
     pub updated_at: u64,
 }
 
@@ -56,12 +63,19 @@ pub struct CredentialEntry {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MaskedCredentialEntry {
     pub id: String,
+    #[serde(default)]
     pub website: String, // Plaintext
+    #[serde(default)]
     pub application: String, // Masked
+    #[serde(default)]
     pub username: String, // Masked
+    #[serde(default)]
     pub password: String, // Masked
+    #[serde(default)]
     pub notes: String, // Masked
+    #[serde(default)]
     pub created_at: u64,
+    #[serde(default)]
     pub updated_at: u64,
 }
 
@@ -114,13 +128,47 @@ pub fn current_timestamp() -> u64 {
         .as_secs()
 }
 
-/// Locate or create safe local storage path for `vault.enc`
-pub fn get_vault_path() -> PathBuf {
-    let mut dir = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+/// Locate or create canonical OS application data directory.
+/// - macOS:   ~/Library/Application Support/SecuredStorage/
+/// - Windows: %APPDATA%\SecuredStorage\ (AppData\Roaming)
+/// - Linux:   ~/.local/share/SecuredStorage/ ($XDG_DATA_HOME)
+pub fn get_vault_dir() -> PathBuf {
+    let mut dir = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
     dir.push("SecuredStorage");
     let _ = fs::create_dir_all(&dir);
-    dir.push("vault.enc");
     dir
+}
+
+/// Primary storage path for `vault.enc` with automatic backward-compatible migration.
+pub fn get_vault_path() -> PathBuf {
+    let dir = get_vault_dir();
+    let modern_path = dir.join("vault.enc");
+
+    // Seamless Legacy Migration:
+    // If modern path doesn't exist yet, check if a legacy vault exists in ~/Documents/SecuredStorage/vault.enc
+    if !modern_path.exists() {
+        if let Some(mut doc_dir) = dirs::document_dir() {
+            doc_dir.push("SecuredStorage");
+            let legacy_path = doc_dir.join("vault.enc");
+            if legacy_path.exists() {
+                // Copy legacy vault to canonical application support directory
+                if fs::copy(&legacy_path, &modern_path).is_ok() {
+                    let legacy_bak = doc_dir.join("vault.enc.bak");
+                    if legacy_bak.exists() {
+                        let _ = fs::copy(&legacy_bak, dir.join("vault.enc.bak"));
+                    }
+                    let _ = fs::remove_file(&legacy_path);
+                }
+            }
+        }
+    }
+
+    modern_path
+}
+
+/// Rolling backup path for power-loss and corruption rollback: `vault.enc.bak`
+pub fn get_backup_path() -> PathBuf {
+    get_vault_dir().join("vault.enc.bak")
 }
 
 /// Check if vault file already exists
@@ -128,30 +176,88 @@ pub fn vault_file_exists() -> bool {
     get_vault_path().exists()
 }
 
-/// Read vault container from disk
+/// Read vault container from disk with automatic backup rollback recovery.
 pub fn read_vault_from_disk() -> Result<VaultContainer, String> {
     let path = get_vault_path();
+    let backup_path = get_backup_path();
+
     if !path.exists() {
+        // If target path doesn't exist, check if a backup exists to recover
+        if backup_path.exists() {
+            if let Ok(bytes) = fs::read(&backup_path) {
+                if let Ok(container) = serde_json::from_slice::<VaultContainer>(&bytes) {
+                    if container.magic == String::from_utf8_lossy(MAGIC_BYTES) {
+                        let _ = fs::copy(&backup_path, &path);
+                        return Ok(container);
+                    }
+                }
+            }
+        }
         return Err("Vault file does not exist".to_string());
     }
 
     let bytes = fs::read(&path).map_err(|e| format!("Failed to read vault file: {}", e))?;
-    let container: VaultContainer =
-        serde_json::from_slice(&bytes).map_err(|_| "Corrupted vault format".to_string())?;
+    let container_res: Result<VaultContainer, _> = serde_json::from_slice(&bytes);
 
-    if container.magic != String::from_utf8_lossy(MAGIC_BYTES) {
-        return Err("Invalid vault magic identifier".to_string());
+    match container_res {
+        Ok(container) => {
+            if container.magic != String::from_utf8_lossy(MAGIC_BYTES) {
+                return Err("Invalid vault magic identifier".to_string());
+            }
+            Ok(container)
+        }
+        Err(err) => {
+            // Target file was corrupted - attempt automatic rollback from backup
+            if backup_path.exists() {
+                if let Ok(bak_bytes) = fs::read(&backup_path) {
+                    if let Ok(container) = serde_json::from_slice::<VaultContainer>(&bak_bytes) {
+                        if container.magic == String::from_utf8_lossy(MAGIC_BYTES) {
+                            let _ = fs::copy(&backup_path, &path);
+                            return Ok(container);
+                        }
+                    }
+                }
+            }
+            Err(format!("Corrupted vault format: {}", err))
+        }
     }
-
-    Ok(container)
 }
 
-/// Write encrypted vault container to disk
+/// Write encrypted vault container to disk using power-loss safe atomic writes.
+/// 1. Creates a rolling pre-save backup: `vault.enc.bak`.
+/// 2. Writes new payload to a temporary file: `vault.enc.tmp`.
+/// 3. Flushes and syncs buffers to physical disk (`File::sync_all`).
+/// 4. Atomically renames temporary file over `vault.enc`.
 pub fn write_vault_to_disk(container: &VaultContainer) -> Result<(), String> {
-    let path = get_vault_path();
+    use std::io::Write;
+
+    let dir = get_vault_dir();
+    let target_path = dir.join("vault.enc");
+    let backup_path = dir.join("vault.enc.bak");
+    let tmp_path = dir.join("vault.enc.tmp");
+
     let bytes = serde_json::to_vec_pretty(container)
         .map_err(|e| format!("Serialization error: {}", e))?;
-    fs::write(&path, bytes).map_err(|e| format!("Failed to write vault: {}", e))?;
+
+    // 1. Create rolling backup if target currently exists
+    if target_path.exists() {
+        let _ = fs::copy(&target_path, &backup_path);
+    }
+
+    // 2. Write to temporary file with explicit disk sync
+    {
+        let mut file = fs::File::create(&tmp_path)
+            .map_err(|e| format!("Failed to create temporary vault file: {}", e))?;
+        file.write_all(&bytes)
+            .map_err(|e| format!("Failed to write temporary vault data: {}", e))?;
+        file.sync_all()
+            .map_err(|e| format!("Failed to sync temporary vault to disk: {}", e))?;
+    }
+
+    // 3. Atomic rename replacing target
+    fs::rename(&tmp_path, &target_path)
+        .map_err(|e| format!("Failed to atomically commit vault to disk: {}", e))?;
+
     Ok(())
 }
 
@@ -189,7 +295,7 @@ pub fn initialize_new_vault(
 
     // Encrypt empty initial payload
     let initial_entries: Vec<CredentialEntry> = Vec::new();
-    let payload_bytes = serde_json::to_vec(&initial_entries).map_err(|e| e.to_string())?;
+    let payload_bytes = Zeroizing::new(serde_json::to_vec(&initial_entries).map_err(|e| e.to_string())?);
 
     let payload_nonce_bytes = generate_random_bytes(NONCE_LEN);
     let mut payload_nonce = [0u8; NONCE_LEN];
@@ -247,7 +353,7 @@ pub fn unlock_with_password(
     }
     nonce.copy_from_slice(&container.payload_nonce);
 
-    let decrypted_bytes = decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?;
+    let decrypted_bytes = Zeroizing::new(decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?);
     let entries: Vec<CredentialEntry> =
         serde_json::from_slice(&decrypted_bytes).map_err(|_| "Failed to parse entries".to_string())?;
 
@@ -312,7 +418,7 @@ pub fn unlock_with_biometric_and_pin(
             }
             nonce.copy_from_slice(&container.payload_nonce);
 
-            let decrypted_bytes = decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?;
+            let decrypted_bytes = Zeroizing::new(decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?);
             let entries: Vec<CredentialEntry> = serde_json::from_slice(&decrypted_bytes)
                 .map_err(|_| "Failed to parse entries".to_string())?;
 
@@ -434,7 +540,7 @@ fn save_session_entries_to_disk(
     entries: &[CredentialEntry],
 ) -> Result<(), String> {
     let mut container = read_vault_from_disk()?;
-    let payload_bytes = serde_json::to_vec(entries).map_err(|e| e.to_string())?;
+    let payload_bytes = Zeroizing::new(serde_json::to_vec(entries).map_err(|e| e.to_string())?);
 
     let payload_nonce_bytes = generate_random_bytes(NONCE_LEN);
     let mut payload_nonce = [0u8; NONCE_LEN];
@@ -524,7 +630,7 @@ pub fn recover_vault_with_key(
     }
     nonce.copy_from_slice(&container.payload_nonce);
 
-    let decrypted_bytes = decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?;
+    let decrypted_bytes = Zeroizing::new(decrypt_aes_gcm(&mek, &nonce, &container.encrypted_payload)?);
     let entries: Vec<CredentialEntry> = serde_json::from_slice(&decrypted_bytes)
         .map_err(|_| "Failed to decrypt vault entries".to_string())?;
 
@@ -663,5 +769,21 @@ mod tests {
         assert!(!session.is_authenticated);
         assert!(session.mek.is_none());
         assert!(session.entries.is_empty());
+    }
+
+    #[test]
+    fn test_credential_entry_schema_evolution() {
+        // Simulates an older vault record missing several newer fields
+        let minimal_json = r#"{"id":"entry-99","website":"example.com"}"#;
+        let entry: Result<CredentialEntry, _> = serde_json::from_str(minimal_json);
+        assert!(entry.is_ok(), "Failed to deserialize minimal/legacy credential record");
+
+        let entry = entry.unwrap();
+        assert_eq!(entry.id, "entry-99");
+        assert_eq!(entry.website, "example.com");
+        assert_eq!(entry.username, "");
+        assert_eq!(entry.password, "");
+        assert_eq!(entry.notes, "");
+        assert_eq!(entry.created_at, 0);
     }
 }
