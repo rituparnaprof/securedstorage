@@ -41,8 +41,14 @@
         <span id="themeText">Light Mode</span>
       </button>
       <div id="headerActions" class="header-actions hidden">
-        <button id="addEntryBtn" class="btn btn-primary">+ Add Credential</button>
-        <button id="lockVaultBtn" class="btn btn-danger">🔒 Lock Vault</button>
+        <button id="addEntryBtn" class="btn btn-primary">
+          <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>Add Credential</span>
+        </button>
+        <button id="lockVaultBtn" class="btn btn-danger">
+          <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Lock Vault</span>
+        </button>
       </div>
     </div>
   </header>
@@ -191,11 +197,11 @@
         <table class="vault-table">
           <thead>
             <tr>
-              <th style="width: 28%;">Site</th>
-              <th style="width: 24%;">Username</th>
-              <th style="width: 24%;">Password</th>
-              <th style="width: 14%;">Notes</th>
-              <th style="width: 10%; text-align: right;">Actions</th>
+              <th style="width: 26%;">Site</th>
+              <th style="width: 23%;">Username</th>
+              <th style="width: 23%;">Password</th>
+              <th style="width: 16%;">Notes</th>
+              <th style="width: 12%; text-align: right; min-width: 105px;">Actions</th>
             </tr>
           </thead>
           <tbody id="vaultTableBody">
@@ -244,6 +250,74 @@
       <div class="modal-footer">
         <button id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
         <button id="saveCredentialBtn" class="btn btn-success">Save & Encrypt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT AUTHENTICATION (MASTER PASSWORD REQUIRED) -->
+  <div id="editAuthModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <svg class="btn-svg" style="color: var(--amber);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Master Password Required</span>
+        </h3>
+        <button id="closeEditAuthBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+          To ensure security, editing site credentials requires your Master Password. Without the Master Password, edits cannot proceed.
+        </p>
+        <div class="form-group">
+          <label for="editAuthPassword">Master Password</label>
+          <input type="password" id="editAuthPassword" placeholder="Enter Master Password" autocomplete="off">
+        </div>
+        <div id="editAuthError" class="alert-box error hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelEditAuthBtn" class="btn btn-secondary">Cancel</button>
+        <button id="confirmEditAuthBtn" class="btn btn-primary">Verify & Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT CREDENTIAL -->
+  <div id="editModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <svg class="btn-svg" style="color: var(--accent-emerald);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          <span>Edit Credential</span>
+        </h3>
+        <button id="closeEditModalBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editEntryId">
+        <div class="form-group">
+          <label for="editWebsite">Site (Visible upon unlock)</label>
+          <input type="text" id="editWebsite" placeholder="e.g. Google, Banking, AWS, Work Email" autocomplete="off">
+          <small class="helper-text">Plain text identifier (e.g. service, brand, or portal)</small>
+        </div>
+        <div class="form-group">
+          <label for="editUser">Username</label>
+          <input type="text" id="editUser" placeholder="e.g. admin@company.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <div class="label-row">
+            <label for="editPass">Password</label>
+            <button id="btnGenerateEditPass" type="button" class="btn-link">Generate Strong</button>
+          </div>
+          <input type="password" id="editPass" placeholder="Enter or generate password" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="editNotes">Notes</label>
+          <textarea id="editNotes" rows="3" placeholder="Security questions, PINs, or recovery codes" autocomplete="off"></textarea>
+        </div>
+        <div id="editModalError" class="alert-box error hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelEditModalBtn" class="btn btn-secondary">Cancel</button>
+        <button id="saveEditCredentialBtn" class="btn btn-success">Update & Encrypt</button>
       </div>
     </div>
   </div>

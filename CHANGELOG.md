@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-09-28
 
 ### Added
+- **Master Password-Gated Credential Editing**:
+  - Implemented 3 dedicated row actions: **View**, **Edit**, and **Delete**.
+  - Editing strictly requires Master Password re-authentication: without verifying the Master Password, entries cannot be viewed in plaintext or modified.
+  - Added native Rust IPC commands `get_entry_for_edit` and `update_entry`, updating credentials atomically to disk with pre-save backup snapshots.
+- **Modern Flat Vector Iconography (Choice 1 - Lucide / Feather)**:
+  - Replaced legacy emojis with crisp, lightweight inline SVG icons (licensed under MIT/ISC, 100% compatible with GNU GPL-3.0).
+  - Modernized **View** (`eye` / `eye-off`), **Edit** (`stylus/pencil`), **Delete** (`trash`), and header **Lock Vault** (`padlock`) actions.
+  - Zero external font or cloud CDN dependencies, adhering strictly to offline Content Security Policy (`default-src 'none'`).
 - **Canonical OS Application Data Storage & Seamless Legacy Migration**:
   - Replaced user documents directory storage with standard OS application data paths (`dirs::data_dir()`):
     - **macOS**: `~/Library/Application Support/SecuredStorage/vault.enc`

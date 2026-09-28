@@ -18,6 +18,12 @@
 
 // SecuredStorage - Client UI State Controller & Anti-Exfiltration Event Traps
 
+// Modern Flat Vector SVGs (Lucide / Feather, MIT/ISC License - GPL-3.0 Compatible)
+const SVG_ICON_EYE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_ICON_EYE_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`;
+const SVG_ICON_EDIT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
+const SVG_ICON_DELETE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
+
 // 1. HARDENED ANTI-EXFILTRATION: Intercept and block all copy/cut/selection events
 document.addEventListener('copy', (e) => e.preventDefault());
 document.addEventListener('cut', (e) => e.preventDefault());
@@ -127,6 +133,36 @@ async function mockBackendHandler(command, args) {
       notes: '••••••••••••'
     }));
   }
+  if (command === 'get_entry_for_edit') {
+    if (!args.masterPassword || args.masterPassword.trim() === '') {
+      throw new Error("Master password cannot be empty");
+    }
+    const entry = mockEntries.find(e => e.id === args.entryId);
+    if (!entry) throw new Error("Entry not found");
+    return entry;
+  }
+  if (command === 'update_entry') {
+    if (!args.masterPassword || args.masterPassword.trim() === '') {
+      throw new Error("Master password cannot be empty");
+    }
+    const idx = mockEntries.findIndex(e => e.id === args.entryId);
+    if (idx !== -1) {
+      mockEntries[idx] = {
+        ...mockEntries[idx],
+        website: args.website,
+        username: args.username,
+        password: args.password,
+        notes: args.notes
+      };
+    }
+    return mockEntries.map(e => ({
+      id: e.id,
+      website: e.website,
+      username: '••••••••••••',
+      password: '••••••••••••',
+      notes: '••••••••••••'
+    }));
+  }
   if (command === 'lock_vault') return "LOCKED";
   return null;
 }
@@ -192,6 +228,28 @@ const modalUser = document.getElementById('modalUser');
 const modalPass = document.getElementById('modalPass');
 const modalNotes = document.getElementById('modalNotes');
 const modalError = document.getElementById('modalError');
+
+// Edit Authentication Modal Elements
+const editAuthModal = document.getElementById('editAuthModal');
+const editAuthPassword = document.getElementById('editAuthPassword');
+const editAuthError = document.getElementById('editAuthError');
+const confirmEditAuthBtn = document.getElementById('confirmEditAuthBtn');
+const cancelEditAuthBtn = document.getElementById('cancelEditAuthBtn');
+const closeEditAuthBtn = document.getElementById('closeEditAuthBtn');
+
+// Edit Credential Modal Elements
+const editModal = document.getElementById('editModal');
+const editEntryId = document.getElementById('editEntryId');
+const editWebsite = document.getElementById('editWebsite');
+const editUser = document.getElementById('editUser');
+const editPass = document.getElementById('editPass');
+const btnGenerateEditPass = document.getElementById('btnGenerateEditPass');
+const editNotes = document.getElementById('editNotes');
+const editModalError = document.getElementById('editModalError');
+const saveEditCredentialBtn = document.getElementById('saveEditCredentialBtn');
+const cancelEditModalBtn = document.getElementById('cancelEditModalBtn');
+const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+
 const lockVaultBtn = document.getElementById('lockVaultBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const themeIcon = document.getElementById('themeIcon');
@@ -616,27 +674,38 @@ function renderVaultTable(entries) {
     tdNotes.appendChild(spanNotes);
     tr.appendChild(tdNotes);
 
-    // Actions: Ephemeral Reveal & Delete (Sleek Ghost Micro-Buttons)
+    // Actions: View (Reveal), Edit (Master Password Gated), and Delete
     const tdActions = document.createElement('td');
     tdActions.className = 'actions-cell';
 
     const actionsWrapper = document.createElement('div');
     actionsWrapper.className = 'actions-wrapper';
     
+    // 1. View / Reveal Button
     const revealBtn = document.createElement('button');
     revealBtn.id = `btn-reveal-${entry.id}`;
-    revealBtn.className = 'btn-icon-action';
+    revealBtn.className = 'btn-icon-action view';
     revealBtn.title = 'Reveal fields for 10 seconds';
-    revealBtn.innerHTML = '👁️';
+    revealBtn.innerHTML = SVG_ICON_EYE;
     revealBtn.addEventListener('click', () => handleEphemeralReveal(entry.id));
 
+    // 2. Edit Button (Requires Master Password)
+    const editBtn = document.createElement('button');
+    editBtn.id = `btn-edit-${entry.id}`;
+    editBtn.className = 'btn-icon-action edit';
+    editBtn.title = 'Edit Credential (Master Password required)';
+    editBtn.innerHTML = SVG_ICON_EDIT;
+    editBtn.addEventListener('click', () => handleEditEntry(entry.id));
+
+    // 3. Delete Button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-icon-action delete';
     deleteBtn.title = 'Delete Credential';
-    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.innerHTML = SVG_ICON_DELETE;
     deleteBtn.addEventListener('click', () => handleDeleteEntry(entry.id));
 
     actionsWrapper.appendChild(revealBtn);
+    actionsWrapper.appendChild(editBtn);
     actionsWrapper.appendChild(deleteBtn);
     tdActions.appendChild(actionsWrapper);
     tr.appendChild(tdActions);
@@ -675,7 +744,7 @@ async function handleEphemeralReveal(entryId) {
     if (cellPass) { cellPass.textContent = passVal; cellPass.className = 'unmasked-badge'; }
     if (cellNotes) { cellNotes.textContent = notesVal || '(None)'; cellNotes.className = 'unmasked-badge'; }
     if (revealBtn) {
-      revealBtn.innerHTML = '🔒';
+      revealBtn.innerHTML = SVG_ICON_EYE_OFF;
       revealBtn.title = 'Hide fields';
       revealBtn.classList.add('active-reveal');
     }
@@ -701,7 +770,7 @@ function remaskRow(entryId) {
   if (cellPass) { cellPass.textContent = '••••••••••••'; cellPass.className = 'masked-text'; }
   if (cellNotes) { cellNotes.textContent = '••••••••••••'; cellNotes.className = 'masked-text'; }
   if (revealBtn) {
-    revealBtn.innerHTML = '👁️';
+    revealBtn.innerHTML = SVG_ICON_EYE;
     revealBtn.title = 'Reveal fields for 10 seconds';
     revealBtn.classList.remove('active-reveal');
   }
@@ -784,6 +853,127 @@ async function handleDeleteEntry(entryId) {
     alert('Failed to delete entry: ' + err);
   }
 }
+
+// -----------------------------------------------------------------------------
+// EDIT CREDENTIAL WORKFLOW (MASTER PASSWORD GATEKEEPER)
+// -----------------------------------------------------------------------------
+let targetEditEntryId = null;
+let currentEditMasterPassword = null;
+
+// Open Master Password Verification Dialog before editing
+function handleEditEntry(entryId) {
+  targetEditEntryId = entryId;
+  currentEditMasterPassword = null;
+  editAuthPassword.value = '';
+  hideError(editAuthError);
+  editAuthModal.classList.remove('hidden');
+  setTimeout(() => editAuthPassword.focus(), 50);
+}
+
+// Confirm Master Password and transition to Edit Form
+async function confirmEditAuth() {
+  const masterPassword = editAuthPassword.value;
+  if (!masterPassword) {
+    showError(editAuthError, 'Master Password is required.');
+    return;
+  }
+
+  try {
+    const entry = await invokeCommand('get_entry_for_edit', {
+      entryId: targetEditEntryId,
+      masterPassword
+    });
+
+    currentEditMasterPassword = masterPassword;
+    editAuthModal.classList.add('hidden');
+
+    // Populate Edit Modal with current values
+    editEntryId.value = entry.id;
+    editWebsite.value = entry.website || '';
+    editUser.value = entry.username || '';
+    editPass.value = entry.password || '';
+    editNotes.value = entry.notes || '';
+    hideError(editModalError);
+
+    editModal.classList.remove('hidden');
+    setTimeout(() => editWebsite.focus(), 50);
+  } catch (err) {
+    showError(editAuthError, 'Verification failed: ' + err.toString());
+  }
+}
+
+// Save Updated Credential
+async function saveEditedEntry() {
+  const entryId = editEntryId.value;
+  const website = editWebsite.value.trim();
+  const username = editUser.value.trim();
+  const password = editPass.value;
+  const notes = editNotes.value.trim();
+
+  if (!website) {
+    showError(editModalError, 'Site is required.');
+    return;
+  }
+  if (!password) {
+    showError(editModalError, 'Password is required.');
+    return;
+  }
+
+  try {
+    const updated = await invokeCommand('update_entry', {
+      entryId,
+      website,
+      username,
+      password,
+      notes,
+      masterPassword: currentEditMasterPassword
+    });
+
+    currentEntries = updated;
+    renderVaultTable(updated);
+    editModal.classList.add('hidden');
+    currentEditMasterPassword = null;
+    targetEditEntryId = null;
+  } catch (err) {
+    showError(editModalError, 'Update failed: ' + err.toString());
+  }
+}
+
+// Edit Modal Event Listeners
+if (closeEditAuthBtn) closeEditAuthBtn.addEventListener('click', () => editAuthModal.classList.add('hidden'));
+if (cancelEditAuthBtn) cancelEditAuthBtn.addEventListener('click', () => editAuthModal.classList.add('hidden'));
+if (confirmEditAuthBtn) confirmEditAuthBtn.addEventListener('click', confirmEditAuth);
+if (editAuthPassword) {
+  editAuthPassword.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmEditAuth();
+  });
+}
+
+if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+if (cancelEditModalBtn) cancelEditModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+if (saveEditCredentialBtn) saveEditCredentialBtn.addEventListener('click', saveEditedEntry);
+
+if (btnGenerateEditPass) {
+  btnGenerateEditPass.addEventListener('click', () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+    let pass = '';
+    const array = new Uint32Array(20);
+    window.crypto.getRandomValues(array);
+    for (let i = 0; i < 20; i++) {
+      pass += chars[array[i] % chars.length];
+    }
+    editPass.value = pass;
+  });
+}
+
+// Global Modal Escape key listener
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (addModal && !addModal.classList.contains('hidden')) addModal.classList.add('hidden');
+    if (editAuthModal && !editAuthModal.classList.contains('hidden')) editAuthModal.classList.add('hidden');
+    if (editModal && !editModal.classList.contains('hidden')) editModal.classList.add('hidden');
+  }
+});
 
 function showError(el, msg) {
   el.textContent = msg;

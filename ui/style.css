@@ -487,6 +487,15 @@ textarea:focus {
   border-color: var(--border-focus);
 }
 
+.btn-svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 /* Modern Sleek Micro-Action Ghost Buttons */
 .btn-icon-action {
   display: inline-flex;
@@ -499,16 +508,22 @@ textarea:focus {
   border: 1px solid transparent;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 13px;
   transition: all var(--transition-fast);
   padding: 0;
   line-height: 1;
 }
 
-.btn-icon-action:hover {
-  background-color: var(--bg-hover);
+.btn-icon-action svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.btn-icon-action.view:hover {
+  background-color: rgba(59, 130, 246, 0.15);
   color: var(--accent-cyan);
-  border-color: var(--border-subtle);
+  border-color: rgba(59, 130, 246, 0.35);
 }
 
 .btn-icon-action.active-reveal {
@@ -517,10 +532,16 @@ textarea:focus {
   border-color: rgba(245, 158, 11, 0.35);
 }
 
+.btn-icon-action.edit:hover {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
 .btn-icon-action.delete:hover {
-  background-color: rgba(244, 63, 94, 0.12);
+  background-color: rgba(244, 63, 94, 0.15);
   color: var(--accent-rose);
-  border-color: rgba(244, 63, 94, 0.3);
+  border-color: rgba(244, 63, 94, 0.35);
 }
 
 .btn-icon-action:active {

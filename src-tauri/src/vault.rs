@@ -518,6 +518,80 @@ pub fn add_new_entry(
     Ok(get_masked_list(&session.entries))
 }
 
+/// Verify Master Password against container Slot 1
+fn verify_master_password(master_password: &str) -> Result<(), String> {
+    if master_password.trim().is_empty() {
+        return Err("Master password cannot be empty".to_string());
+    }
+    let container = read_vault_from_disk()?;
+    let _ = unlock_key_slot(master_password.as_bytes(), &container.slot_password)?;
+    Ok(())
+}
+
+/// Retrieve a full plaintext entry for editing after verifying Master Password
+pub fn get_entry_with_password(
+    entry_id: &str,
+    master_password: &str,
+    session: &VaultSession,
+) -> Result<CredentialEntry, String> {
+    if !session.is_authenticated {
+        return Err("Vault is locked".to_string());
+    }
+
+    // Strict security check: Edit requires Master Password
+    verify_master_password(master_password)?;
+
+    let entry = session
+        .entries
+        .iter()
+        .find(|e| e.id == entry_id)
+        .cloned()
+        .ok_or_else(|| "Entry not found".to_string())?;
+
+    Ok(entry)
+}
+
+/// Update an existing entry by ID after verifying Master Password, and re-encrypt the vault
+pub fn update_entry_by_id(
+    entry_id: &str,
+    website: String,
+    username: String,
+    password: String,
+    notes: String,
+    master_password: &str,
+    session: &mut VaultSession,
+) -> Result<Vec<MaskedCredentialEntry>, String> {
+    if !session.is_authenticated {
+        return Err("Vault is locked".to_string());
+    }
+
+    if website.trim().is_empty() {
+        return Err("Site cannot be empty".to_string());
+    }
+
+    // Strict security check: Edit requires Master Password
+    verify_master_password(master_password)?;
+
+    let mek = session.mek.as_ref().ok_or_else(|| "MEK not found".to_string())?;
+
+    let now = current_timestamp();
+    let entry = session
+        .entries
+        .iter_mut()
+        .find(|e| e.id == entry_id)
+        .ok_or_else(|| "Entry not found".to_string())?;
+
+    entry.website = website;
+    entry.username = username;
+    entry.password = password;
+    entry.notes = notes;
+    entry.updated_at = now;
+
+    save_session_entries_to_disk(mek, &session.entries)?;
+
+    Ok(get_masked_list(&session.entries))
+}
+
 /// Delete an entry by ID and re-encrypt the vault to disk
 pub fn delete_entry_by_id(
     entry_id: &str,
@@ -785,5 +859,16 @@ mod tests {
         assert_eq!(entry.password, "");
         assert_eq!(entry.notes, "");
         assert_eq!(entry.created_at, 0);
+    }
+
+    #[test]
+    fn test_verify_master_password_on_edit() {
+        // Test that an empty password fails immediately
+        let res = verify_master_password("");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err(), "Master password cannot be empty");
+
+        let res_whitespace = verify_master_password("   ");
+        assert!(res_whitespace.is_err());
     }
 }

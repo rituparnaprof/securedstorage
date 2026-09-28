@@ -24,9 +24,10 @@ pub mod vault;
 
 use tauri::{Manager, State};
 use vault::{
-    add_new_entry, delete_entry_by_id, initialize_new_vault, recover_vault_with_key,
-    reveal_entry_field, step_verify_biometrics, unlock_with_biometric_and_pin,
-    unlock_with_password, vault_file_exists, MaskedCredentialEntry, SafeSession, VaultSession,
+    add_new_entry, delete_entry_by_id, get_entry_with_password, initialize_new_vault,
+    recover_vault_with_key, reveal_entry_field, step_verify_biometrics,
+    unlock_with_biometric_and_pin, unlock_with_password, update_entry_by_id, vault_file_exists,
+    CredentialEntry, MaskedCredentialEntry, SafeSession, VaultSession,
 };
 
 #[derive(serde::Serialize)]
@@ -115,6 +116,38 @@ fn add_entry(
 }
 
 #[tauri::command]
+fn get_entry_for_edit(
+    entry_id: String,
+    master_password: String,
+    session: State<'_, SafeSession>,
+) -> Result<CredentialEntry, String> {
+    let sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
+    get_entry_with_password(&entry_id, &master_password, &sess)
+}
+
+#[tauri::command]
+fn update_entry(
+    entry_id: String,
+    website: String,
+    username: String,
+    password: String,
+    notes: String,
+    master_password: String,
+    session: State<'_, SafeSession>,
+) -> Result<Vec<MaskedCredentialEntry>, String> {
+    let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
+    update_entry_by_id(
+        &entry_id,
+        website,
+        username,
+        password,
+        notes,
+        &master_password,
+        &mut sess,
+    )
+}
+
+#[tauri::command]
 fn delete_entry(
     entry_id: String,
     session: State<'_, SafeSession>,
@@ -151,6 +184,8 @@ pub fn run() {
             recover_vault,
             reveal_field,
             add_entry,
+            get_entry_for_edit,
+            update_entry,
             delete_entry,
             lock_vault
         ])
