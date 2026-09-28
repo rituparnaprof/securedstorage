@@ -16,33 +16,33 @@ Unlike purely browser-based solutions:
 ```
 +========================================================================================+
 |                               TAURI NATIVE COMPILED BINARY                              |
-|                                                                                        |
-|  +----------------------------------------------------------------------------------+  |
-|  |                   HARDENED WEBVIEW LAYER (Edge WebView2 / WebKit)                |  |
-|  |  - Zero Remote CDNs, Zero External Sockets, Strict CSP ('default-src none')      |  |
-|  |  - Anti-Copy Enforced: user-select: none, Ctrl+C/Cmd+C/Cut/Context-Menu blocked  |  |
+|                                                                                         |
+|  +-----------------------------------------------------------------------------------+  |
+|  |                   HARDENED WEBVIEW LAYER (Edge WebView2 / WebKit)                 |  |
+|  |  - Zero Remote CDNs, Zero External Sockets, Strict CSP ('default-src none')       |  |
+|  |  - Anti-Copy Enforced: user-select: none, Ctrl+C/Cmd+C/Cut/Context-Menu blocked   |  |
 |  |  - Default Vault View: ONLY 'Website' is visible; all other fields MASKED (••••)  |  |
 |  |  - Manual Ephemeral Unmask: Single field revealed only upon explicit click        |  |
-|  |  - Auto-Lock on user inactivity, window minimize, or window blur                 |  |
-|  +------------------------------------------+---------------------------------------+  |
-|                                             | Strict Tauri v2 IPC Bridge               |
-|                                             | (Strongly Typed Rust Commands)           |
-|                                             v                                          |
-|  +----------------------------------------------------------------------------------+  |
-|  |                             RUST NATIVE SECURITY CORE                            |  |
-|  |  - Anti-Screenshot & Screen-Recording Block:                                     |  |
-|  |      * macOS: NSWindow.sharingType = .none (Blackout in captures / screen share) |  |
-|  |      * Windows: SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE) (Blackout)      |  |
-|  |      * Linux: Canvas obfuscation on focus loss / Wayland protection              |  |
-|  |  - Cryptographic Engine: AES-256-GCM, Argon2id, NIST FIPS 203 (ML-KEM-1024)      |  |
-|  |  - Key Management: Master Encryption Key (MEK) locked via `mlock` / `VirtualLock`|  |
-|  |  - Automatic Zeroization: `zeroize` crate on all sensitive memory drops          |  |
-|  |  - OS Biometric Interfaces:                                                      |  |
-|  |      * macOS: `LocalAuthentication` (Touch ID) + Mandatory 6-Digit PIN           |  |
-|  |      * Windows: `UserConsentVerifier` (Hello) + Mandatory 6-Digit PIN            |  |
-|  |      * Linux: `libpam` / `fprintd` PolicyKit + Mandatory 6-Digit PIN             |  |
-|  |  - Cross-Platform Anti-Debugging & Binary Tamper Resistance                      |  |
-|  +------------------------------------------+---------------------------------------+  |
+|  |  - Auto-Lock on user inactivity, window minimize, or window blur                  |  |
+|  +------------------------------------------+----------------------------------------+  |
+|                                             | Strict Tauri v2 IPC Bridge                |
+|                                             | (Strongly Typed Rust Commands)            |
+|                                             v                                           |
+|  +-----------------------------------------------------------------------------------+  |
+|  |                             RUST NATIVE SECURITY CORE                             |  |
+|  |  - Anti-Screenshot & Screen-Recording Block:                                      |  |
+|  |      * macOS: NSWindow.sharingType = .none (Blackout in captures / screen share)  |  |
+|  |      * Windows: SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE) (Blackout)       |  |
+|  |      * Linux: Canvas obfuscation on focus loss / Wayland protection               |  |
+|  |  - Cryptographic Engine: AES-256-GCM, Argon2id, NIST FIPS 203 (ML-KEM-1024)       |  |
+|  |  - Key Management: Master Encryption Key (MEK) locked via `mlock` / `VirtualLock` |  |
+|  |  - Automatic Zeroization: `zeroize` crate on all sensitive memory drops           |  |
+|  |  - OS Biometric Interfaces:                                                       |  |
+|  |      * macOS: `LocalAuthentication` (Touch ID) + Mandatory 6-Digit PIN            |  |
+|  |      * Windows: `UserConsentVerifier` (Hello) + Mandatory 6-Digit PIN             |  |
+|  |      * Linux: `libpam` / `fprintd` PolicyKit + Mandatory 6-Digit PIN              |  |
+|  |  - Cross-Platform Anti-Debugging & Binary Tamper Resistance                       |  |
+|  +------------------------------------------+----------------------------------------+  |
 +=============================================|==========================================+
                                               v (Encrypted Binary Stream)
                      +--------------------------------------------------+
@@ -191,7 +191,7 @@ A 6-digit numeric PIN provides $1,000,000$ combinations ($10^6$), which is stand
 |   - Auth Tag: 16 bytes                                                  |
 +-------------------------------------------------------------------------+
 | Key Slot 2 (Biometrics + PIN Unlock):                                   |
-|   - Enabled: 1 byte (0x01 = Active, 0x00 = Disabled)                   |
+|   - Enabled: 1 byte (0x01 = Active, 0x00 = Disabled)                    |
 |   - Salt: 16 bytes                                                      |
 |   - Nonce / IV: 12 bytes                                                |
 |   - Encrypted MEK: 32 bytes                                             |
