@@ -16,10 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-09-28
 
 ### Added
-- **Master Password-Gated Credential Editing**:
+- **Master Password-Gated Credential Editing & Deletion**:
   - Implemented 3 dedicated row actions: **View**, **Edit**, and **Delete**.
-  - Editing strictly requires Master Password re-authentication: without verifying the Master Password, entries cannot be viewed in plaintext or modified.
-  - Added native Rust IPC commands `get_entry_for_edit` and `update_entry`, updating credentials atomically to disk with pre-save backup snapshots.
+  - Both editing and deletion strictly require Master Password re-authentication: without verifying the Master Password, entries cannot be viewed in plaintext, modified, or permanently deleted.
+  - Added native Rust IPC commands `get_entry_for_edit`, `update_entry`, and upgraded `delete_entry` with cryptographic slot verification, updating credentials atomically to disk with pre-save backup snapshots.
+  - Added dedicated Master Password authorization modals for both editing (`editAuthModal`) and permanent deletion (`deleteAuthModal`), featuring target site labeling, autofocus, and full keyboard navigation (Enter / Escape).
 - **Modern Flat Vector Iconography (Choice 1 - Lucide / Feather)**:
   - Replaced legacy emojis with crisp, lightweight inline SVG icons (licensed under MIT/ISC, 100% compatible with GNU GPL-3.0).
   - Modernized **View** (`eye` / `eye-off`), **Edit** (`stylus/pencil`), **Delete** (`trash`), and header **Lock Vault** (`padlock`) actions.

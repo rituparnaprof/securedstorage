@@ -150,10 +150,11 @@ fn update_entry(
 #[tauri::command]
 fn delete_entry(
     entry_id: String,
+    master_password: String,
     session: State<'_, SafeSession>,
 ) -> Result<Vec<MaskedCredentialEntry>, String> {
     let mut sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
-    delete_entry_by_id(&entry_id, &mut sess)
+    delete_entry_by_id(&entry_id, &master_password, &mut sess)
 }
 
 #[tauri::command]

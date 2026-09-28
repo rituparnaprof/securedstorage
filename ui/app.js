@@ -124,6 +124,9 @@ async function mockBackendHandler(command, args) {
     }));
   }
   if (command === 'delete_entry') {
+    if (!args.masterPassword || args.masterPassword.trim() === '') {
+      throw new Error("Master password cannot be empty");
+    }
     mockEntries = mockEntries.filter(e => e.id !== args.entryId);
     return mockEntries.map(e => ({
       id: e.id,
@@ -249,6 +252,15 @@ const editModalError = document.getElementById('editModalError');
 const saveEditCredentialBtn = document.getElementById('saveEditCredentialBtn');
 const cancelEditModalBtn = document.getElementById('cancelEditModalBtn');
 const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+
+// Delete Authentication Modal Elements
+const deleteAuthModal = document.getElementById('deleteAuthModal');
+const deleteTargetSite = document.getElementById('deleteTargetSite');
+const deleteAuthPassword = document.getElementById('deleteAuthPassword');
+const deleteAuthError = document.getElementById('deleteAuthError');
+const confirmDeleteAuthBtn = document.getElementById('confirmDeleteAuthBtn');
+const cancelDeleteAuthBtn = document.getElementById('cancelDeleteAuthBtn');
+const closeDeleteAuthBtn = document.getElementById('closeDeleteAuthBtn');
 
 const lockVaultBtn = document.getElementById('lockVaultBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -700,7 +712,7 @@ function renderVaultTable(entries) {
     // 3. Delete Button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-icon-action delete';
-    deleteBtn.title = 'Delete Credential';
+    deleteBtn.title = 'Delete Credential (Master Password required)';
     deleteBtn.innerHTML = SVG_ICON_DELETE;
     deleteBtn.addEventListener('click', () => handleDeleteEntry(entry.id));
 
@@ -842,17 +854,58 @@ saveCredentialBtn.addEventListener('click', async () => {
   }
 });
 
-// Delete Credential
-async function handleDeleteEntry(entryId) {
-  if (!confirm('Are you sure you want to permanently delete this credential?')) return;
-  try {
-    const updated = await invokeCommand('delete_entry', { entryId });
-    currentEntries = updated;
-    renderVaultTable(updated);
-  } catch (err) {
-    alert('Failed to delete entry: ' + err);
+// -----------------------------------------------------------------------------
+// DELETE CREDENTIAL WORKFLOW (MASTER PASSWORD GATEKEEPER)
+// -----------------------------------------------------------------------------
+let targetDeleteEntryId = null;
+
+function handleDeleteEntry(entryId) {
+  targetDeleteEntryId = entryId;
+  const entry = currentEntries.find(e => e.id === entryId);
+  const siteName = entry ? (entry.website || 'this credential') : 'this credential';
+  if (deleteTargetSite) deleteTargetSite.textContent = siteName;
+  if (deleteAuthPassword) deleteAuthPassword.value = '';
+  hideError(deleteAuthError);
+  if (deleteAuthModal) {
+    deleteAuthModal.classList.remove('hidden');
+    setTimeout(() => {
+      if (deleteAuthPassword) deleteAuthPassword.focus();
+    }, 50);
   }
 }
+
+async function confirmDeleteAuth() {
+  const masterPassword = deleteAuthPassword.value;
+  if (!masterPassword) {
+    showError(deleteAuthError, 'Master Password is required.');
+    return;
+  }
+
+  if (confirmDeleteAuthBtn) {
+    confirmDeleteAuthBtn.disabled = true;
+    confirmDeleteAuthBtn.textContent = 'Verifying & Deleting...';
+  }
+
+  try {
+    const updated = await invokeCommand('delete_entry', {
+      entryId: targetDeleteEntryId,
+      masterPassword
+    });
+    currentEntries = updated;
+    renderVaultTable(updated);
+    if (deleteAuthModal) deleteAuthModal.classList.add('hidden');
+    targetDeleteEntryId = null;
+    if (deleteAuthPassword) deleteAuthPassword.value = '';
+  } catch (err) {
+    showError(deleteAuthError, 'Verification failed: ' + err.toString());
+  } finally {
+    if (confirmDeleteAuthBtn) {
+      confirmDeleteAuthBtn.disabled = false;
+      confirmDeleteAuthBtn.textContent = 'Delete Credential';
+    }
+  }
+}
+
 
 // -----------------------------------------------------------------------------
 // EDIT CREDENTIAL WORKFLOW (MASTER PASSWORD GATEKEEPER)
@@ -966,12 +1019,23 @@ if (btnGenerateEditPass) {
   });
 }
 
+// Delete Modal Event Listeners
+if (closeDeleteAuthBtn) closeDeleteAuthBtn.addEventListener('click', () => deleteAuthModal.classList.add('hidden'));
+if (cancelDeleteAuthBtn) cancelDeleteAuthBtn.addEventListener('click', () => deleteAuthModal.classList.add('hidden'));
+if (confirmDeleteAuthBtn) confirmDeleteAuthBtn.addEventListener('click', confirmDeleteAuth);
+if (deleteAuthPassword) {
+  deleteAuthPassword.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmDeleteAuth();
+  });
+}
+
 // Global Modal Escape key listener
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (addModal && !addModal.classList.contains('hidden')) addModal.classList.add('hidden');
     if (editAuthModal && !editAuthModal.classList.contains('hidden')) editAuthModal.classList.add('hidden');
     if (editModal && !editModal.classList.contains('hidden')) editModal.classList.add('hidden');
+    if (deleteAuthModal && !deleteAuthModal.classList.contains('hidden')) deleteAuthModal.classList.add('hidden');
   }
 });
 

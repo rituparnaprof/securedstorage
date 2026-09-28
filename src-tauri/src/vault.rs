@@ -592,14 +592,18 @@ pub fn update_entry_by_id(
     Ok(get_masked_list(&session.entries))
 }
 
-/// Delete an entry by ID and re-encrypt the vault to disk
+/// Delete an entry by ID after verifying Master Password, and re-encrypt the vault to disk
 pub fn delete_entry_by_id(
     entry_id: &str,
+    master_password: &str,
     session: &mut VaultSession,
 ) -> Result<Vec<MaskedCredentialEntry>, String> {
     if !session.is_authenticated {
         return Err("Vault is locked".to_string());
     }
+
+    // Strict security check: Delete requires Master Password
+    verify_master_password(master_password)?;
 
     let mek = session.mek.as_ref().ok_or_else(|| "MEK not found".to_string())?;
     session.entries.retain(|e| e.id != entry_id);
@@ -870,5 +874,25 @@ mod tests {
 
         let res_whitespace = verify_master_password("   ");
         assert!(res_whitespace.is_err());
+    }
+
+    #[test]
+    fn test_verify_master_password_on_delete() {
+        let mut session = VaultSession::new();
+        // 1. Locked session rejection
+        session.is_authenticated = false;
+        let res_locked = delete_entry_by_id("id-123", "password", &mut session);
+        assert!(res_locked.is_err());
+        assert_eq!(res_locked.unwrap_err(), "Vault is locked");
+
+        // 2. Empty master password rejection
+        session.is_authenticated = true;
+        let res_empty = delete_entry_by_id("id-123", "", &mut session);
+        assert!(res_empty.is_err());
+        assert_eq!(res_empty.unwrap_err(), "Master password cannot be empty");
+
+        let res_ws = delete_entry_by_id("id-123", "   ", &mut session);
+        assert!(res_ws.is_err());
+        assert_eq!(res_ws.unwrap_err(), "Master password cannot be empty");
     }
 }
