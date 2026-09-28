@@ -66,8 +66,7 @@ pub fn apply_window_capture_protection(_window: &tauri::WebviewWindow) {
     {
         // On macOS, set NSWindow.sharingType = NSWindowSharingNone (0)
         // This causes the window to render completely transparent/black in all screen captures and screen shares
-        if let Ok(ns_window_ptr) = _window.ns_window() {
-            let ns_window = ns_window_ptr as *mut std::ffi::c_void;
+        if let Ok(ns_window) = _window.ns_window() {
             if !ns_window.is_null() {
                 unsafe {
                     // Use Objective-C runtime msgSend to call [nsWindow setSharingType:0]
@@ -75,7 +74,7 @@ pub fn apply_window_capture_protection(_window: &tauri::WebviewWindow) {
                         fn objc_msgSend(receiver: *mut std::ffi::c_void, op: *const std::ffi::c_void, arg: usize);
                         fn sel_registerName(name: *const libc::c_char) -> *const std::ffi::c_void;
                     }
-                    let sel = sel_registerName(b"setSharingType:\0".as_ptr() as *const libc::c_char);
+                    let sel = sel_registerName(c"setSharingType:".as_ptr());
                     objc_msgSend(ns_window, sel, 0); // 0 = NSWindowSharingNone
                 }
             }

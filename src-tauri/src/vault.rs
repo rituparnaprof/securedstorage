@@ -75,6 +75,12 @@ pub struct VaultSession {
     pub biometric_verified_at: Option<SystemTime>,
 }
 
+impl Default for VaultSession {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VaultSession {
     pub fn new() -> Self {
         Self {

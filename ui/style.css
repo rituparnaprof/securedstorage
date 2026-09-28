@@ -487,28 +487,6 @@ textarea:focus {
   border-color: var(--border-focus);
 }
 
-.btn-icon {
-  background: var(--bg-surface-glass);
-  border: 1px solid var(--border-subtle);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  transition: all var(--transition-fast);
-}
-
-.btn-icon:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-main);
-  border-color: var(--accent-cyan);
-}
-
-.btn-icon.delete:hover {
-  color: var(--accent-rose);
-  border-color: var(--accent-rose);
-}
-
 /* Modern Sleek Micro-Action Ghost Buttons */
 .btn-icon-action {
   display: inline-flex;

@@ -87,7 +87,6 @@ async function mockBackendHandler(command, args) {
       entries: mockEntries.map(e => ({
         id: e.id,
         website: e.website,
-        application: '••••••••••••',
         username: '••••••••••••',
         password: '••••••••••••',
         notes: '••••••••••••'
@@ -98,7 +97,6 @@ async function mockBackendHandler(command, args) {
     return mockEntries.map(e => ({
       id: e.id,
       website: e.website,
-      application: '••••••••••••',
       username: '••••••••••••',
       password: '••••••••••••',
       notes: '••••••••••••'
@@ -114,7 +112,6 @@ async function mockBackendHandler(command, args) {
     return mockEntries.map(e => ({
       id: e.id,
       website: e.website,
-      application: '••••••••••••',
       username: '••••••••••••',
       password: '••••••••••••',
       notes: '••••••••••••'
@@ -125,7 +122,6 @@ async function mockBackendHandler(command, args) {
     return mockEntries.map(e => ({
       id: e.id,
       website: e.website,
-      application: '••••••••••••',
       username: '••••••••••••',
       password: '••••••••••••',
       notes: '••••••••••••'
@@ -234,7 +230,6 @@ function applyTheme(theme) {
 async function initApp() {
   setupTheme();
   resetIdleTimer();
-  setupEventListeners();
 
   try {
     const exists = await invokeCommand('check_vault_exists');
@@ -737,7 +732,7 @@ cancelModalBtn.addEventListener('click', () => addModal.classList.add('hidden'))
 btnGeneratePass.addEventListener('click', () => {
   const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*-_+=';
   let pass = '';
-  const cryptoObj = window.crypto || window.msCrypto;
+  const cryptoObj = window.crypto;
   const values = new Uint32Array(20);
   cryptoObj.getRandomValues(values);
   for (let i = 0; i < 20; i++) {
@@ -799,8 +794,6 @@ function hideError(el) {
   el.textContent = '';
   el.classList.add('hidden');
 }
-
-function setupEventListeners() {}
 
 // Start on DOM ready
 document.addEventListener('DOMContentLoaded', initApp);

@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Native Biometric IPC Resolution & Zero Touch ID Reuse**:
   - Configured `"withGlobalTauri": true` in `tauri.conf.json`, ensuring `window.__TAURI__.core.invoke` is reliably injected into the webview rather than silently falling back to mock handlers.
   - Enforced `context.touchIDAuthenticationAllowableReuseDuration = 0.0` in `touchid_macos.m` so macOS strictly prompts for a physical biometric sensor touch on every unlock attempt.
+- **Code Optimization & Dead Code Removal**:
+  - Implemented `Default` trait for `VaultSession` in `vault.rs`.
+  - Optimized Objective-C runtime bridge in `security.rs` by removing redundant raw pointer casting and adopting modern `c""` C string literals.
+  - Eliminated dead JavaScript functions (`setupEventListeners()`), removed obsolete IE11 `msCrypto` fallbacks, and purged unused CSS rules (`.btn-icon`).
+  - Cleaned up mock data schemas to align strictly with the streamlined Site credential model.
 
 ## [1.0.9] - 2026-09-26
 
