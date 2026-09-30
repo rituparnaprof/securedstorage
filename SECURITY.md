@@ -1,60 +1,55 @@
 # Security Policy
 
-The security and privacy of **SecuredStorage** users are paramount. Because SecuredStorage handles sensitive credentials and cryptographic keys, we take all vulnerability reports seriously and appreciate responsible disclosure from the security research community.
+## Maintenance Model: Best-Effort & Discretionary
+
+**SecuredStorage** is an independent, personal open-source project provided on an **"AS IS"** basis under the GNU General Public License v3.0.
+
+- **No Obligation to Patch**: The maintainer cares about software security and **may choose to review, investigate, or release updates at their sole discretion**. However, the maintainer is under **no obligation or legal commitment** to respond to, triage, or fix reported issues.
+- **No Response SLA or Patch Guarantees**: There are no guaranteed response times, turnaround schedules, or commitments to publish maintenance releases.
+- **Forks Encouraged**: If you identify a vulnerability, security flaw, or improvement that requires immediate remediation, you are encouraged to fork the repository under the **GNU General Public License v3.0** and apply your own fixes.
 
 ---
 
 ## Supported Versions
 
-Only the latest release receives active security patches:
+If security fixes or updates are ever published, they will only be applied to the **latest release**:
 
-| Version | Supported |
-| :--- | :---: |
-| **1.2.x** | :white_check_mark: |
-| < 1.2.0 | :x: |
-
-We strongly recommend always running the latest version available on the [Releases](https://github.com/rituparnaprof/securedstorage/releases) page.
+| Version | Status |
+| :--- | :--- |
+| **Latest Release (1.2.x)** | Best-effort / Discretionary updates only |
+| < 1.2.0 | Unsupported (No backports) |
 
 ---
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability or cryptographic flaw in SecuredStorage, **please do not open a public GitHub issue**. Public disclosure before a patch is ready puts user credentials at risk.
+If you discover a security vulnerability or cryptographic flaw and wish to disclose it responsibly, **please do not open a public GitHub issue**.
 
-Instead, report vulnerabilities privately through one of the following methods:
+You may submit reports privately through:
 
 ### Method 1: GitHub Private Vulnerability Reporting (Preferred)
-1. Go to the repository's [Security Tab](https://github.com/rituparnaprof/securedstorage/security).
+1. Navigate to the repository's [Security Tab](https://github.com/rituparnaprof/securedstorage/security).
 2. Click **"Report a vulnerability"** under Advisories.
-3. Submit your findings securely. This opens a private communication channel directly with the maintainer.
+3. Submit your details privately.
 
 ### Method 2: Contact Maintainer
-If Private Vulnerability Reporting is unavailable, send an email to:
+If Private Vulnerability Reporting is unavailable, you may email:  
 **`334075393+rituparnaprof@users.noreply.github.com`** with the subject line:  
 `[SECURITY] Vulnerability Report: SecuredStorage`
 
 ---
 
-## What to Include in Your Report
+## Vulnerability Handling Expectations
 
-To help us investigate and resolve the issue quickly, please include:
-
-- **Type of Issue**: (e.g., Cryptographic flaw, RAM scraping / memory zeroization bypass, IPC command forgery, anti-debugging bypass).
-- **Target Platform**: macOS (Apple Silicon / Intel), Windows 10/11, or Linux (X11 / Wayland).
-- **Steps to Reproduce**: Clear, detailed steps or a minimal Proof of Concept (PoC) demonstrating the vulnerability.
-- **Potential Impact**: What an attacker could achieve (e.g., read plaintext secrets, tamper with stored ciphertext).
+- **Triage & Review**: Reports are received as voluntary, informational contributions. They will be reviewed only if and when the maintainer has the time and inclination to do so.
+- **Remediation**: The decision whether to accept, modify code, or reject a reported issue rests entirely with the maintainer.
+- **Credit**: If an update is released addressing a valid finding, credit will be happily attributed in release notes (unless the reporter prefers anonymity).
 
 ---
 
-## Our Vulnerability Response Process
+## Disclaimer of Warranty
 
-1. **Acknowledgment**: We aim to acknowledge receipt of your report within **48 hours**.
-2. **Investigation & Triage**: We will confirm the issue, assess severity, and determine an engineered fix in a private branch.
-3. **Patch Release**: A patched release will be compiled and tagged across macOS, Linux, and Windows.
-4. **Public Advisory & Credit**: Once the patch is published, a public security advisory will be issued, properly crediting the finder (unless you prefer anonymity).
+As outlined in Sections 15 and 16 of the [GNU General Public License v3.0](LICENSE):
+> The program is provided **"AS IS" without warranty of any kind**, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability.
 
----
-
-## Security Architecture & Guarantees
-
-For a detailed review of our threat modeling, in-memory RAM defense layers, cryptographic primitives (AES-256-GCM, Argon2id, ML-KEM-1024), and OS window shielding, please consult [ARCHITECTURE.md](ARCHITECTURE.md).
+For a detailed review of the vault's architectural threat model, RAM zeroization mechanisms, and cryptographic design, see [ARCHITECTURE.md](ARCHITECTURE.md).
