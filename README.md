@@ -115,3 +115,5 @@ Building the application on your own machine creates an ad-hoc signed local bina
 ## License
 
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0-or-later)**. See the [LICENSE](LICENSE) file for the full license text.
+
+For third-party software licenses and attributions, see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

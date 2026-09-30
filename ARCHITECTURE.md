@@ -338,3 +338,14 @@ stateDiagram-v2
     UnlockedDefault --> Locked: 5-Minute Inactivity or Window Minimize / Blur
     UnlockedDefault --> Locked: Click Lock Vault Button
 ```
+
+---
+
+## 9. Cryptographic Export Compliance & Regulatory Status
+
+SecuredStorage implements robust cryptographic algorithms including AES-256-GCM, Argon2id, and NIST FIPS 203 (ML-KEM-1024 / Kyber-1024).
+
+- **United States Export Administration Regulations (EAR)**:
+  Under **15 CFR § 734.3(b)(3)** and **15 CFR § 742.15(b)**, publicly available open-source software containing encryption code published for free and unrestricted public download is **not subject to the EAR** (License Exception TSU / publicly available encryption source code).
+- **No Export Registration Required**: In accordance with the Bureau of Industry and Security (BIS) regulatory revisions, publicly available open-source encryption source code published on publicly accessible repositories (such as GitHub) does not require email notification to BIS or the NSA.
+- **Wassenaar Arrangement**: Complies with the General Software Note (GSN) release for publicly available open-source software.

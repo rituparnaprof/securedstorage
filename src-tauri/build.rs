@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /*
  * SecuredStorage - PQC-Compliant Offline Password Vault
- * Copyright (C) 2026 Rituparna Ghosh
+ * Copyright (C) 2026 rituparnaprof
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
