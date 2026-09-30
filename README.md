@@ -104,7 +104,9 @@ Building the application on your own machine creates an ad-hoc signed local bina
 
 ### 3. Trademark Disclaimer
 > [!IMPORTANT]
-> Apple, macOS, Touch ID, Windows, and Windows Hello are trademarks of their respective owners. **SecuredStorage** is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or associated with Apple Inc. or Microsoft Corporation.
+> macOS, Apple, and Touch ID are trademarks of Apple Inc. Windows and Windows Hello are trademarks of Microsoft Corporation. Linux is a registered trademark of Linus Torvalds. Ubuntu is a registered trademark of Canonical Ltd. Debian, Fedora, Arch Linux, and other referenced trademarks, product names, and logos belong to their respective owners.
+>
+> **SecuredStorage** is an independent open-source project and is not affiliated with, endorsed by, sponsored by, or associated with any of these trademark holders. All operating system and distribution names are used strictly for compatibility identification purposes.
 >
 > UI icons are provided by [Lucide](https://lucide.dev) / [Feather](https://feathericons.com) under the MIT/ISC licenses.
 
