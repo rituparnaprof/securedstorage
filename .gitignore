@@ -3,13 +3,37 @@ target/
 src-tauri/target/
 node_modules/
 dist/
+standalone/
 *.log
 
 # Operating System files
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Vault sensitive local data (NEVER commit to git!)
+# Vault sensitive local data & backups (NEVER commit to git!)
 *.enc
+*.enc.*
+*.bak
+*.tmp
 vault.enc
 test-vault.enc
+
+# Local environment & secrets
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Release artifacts & temporary notes
+RELEASE_NOTES.md
+*.dmg
+*.zip
+*.tar.gz
+*.exe
+*.msi
+*.deb
+*.rpm
+*.AppImage

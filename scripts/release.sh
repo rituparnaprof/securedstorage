@@ -17,9 +17,9 @@ cd "$REPO_ROOT"
 # 1. Ensure user email and name are configured
 CURRENT_EMAIL=$(git config user.email || true)
 if [ "$CURRENT_EMAIL" != "334075393+rituparnaprof@users.noreply.github.com" ]; then
-  git config user.name "Rituparna Ghosh"
+  git config user.name "rituparnaprof"
   git config user.email "334075393+rituparnaprof@users.noreply.github.com"
-  echo "✔ Configured git author: Rituparna Ghosh <334075393+rituparnaprof@users.noreply.github.com>"
+  echo "✔ Configured git author: rituparnaprof <334075393+rituparnaprof@users.noreply.github.com>"
 fi
 
 # 2. Extract latest version from Cargo.toml
