@@ -16,8 +16,8 @@ If security fixes or updates are ever published, they will only be applied to th
 
 | Version | Status |
 | :--- | :--- |
-| **Latest Release (1.2.x)** | Best-effort / Discretionary updates only |
-| < 1.2.0 | Unsupported (No backports) |
+| **Latest Release (1.3.x)** | Best-effort / Discretionary updates only |
+| < 1.3.0 | Unsupported (No backports) |
 
 ---
 

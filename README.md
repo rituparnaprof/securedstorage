@@ -16,7 +16,7 @@
 - **Master Password-Gated Edit & Delete**: Editing and permanently deleting credentials strictly require Master Password re-authentication, preventing accidental changes or unauthorized tampering while the vault is open.
 - **Ephemeral 10-Second Reveal**: Only the Site name is shown by default. Usernames, passwords, and notes remain masked (`••••••••••••`) until individually revealed, automatically re-masking after 10 seconds.
 - **Anti-Screenshot & Screen-Recording Blackout**: Protects against malware, remote desktop sessions, OBS/Zoom screenshares, and OS screenshot tools by rendering the window black to capture APIs.
-- **Anti-Copy & Clipboard Lockdown**: Suppresses copy/cut shortcuts, context menus, and text selection, ensuring credentials can never be intercepted by clipboard loggers.
+- **Native Ephemeral Concealed Clipboard**: Copy Username or Password securely without exposing plaintext on screen. Native OS concealment flags (`org.nspasteboard.ConcealedType`, `TransientType`) suppress clipboard history tools (Alfred, Raycast, Maccy) and cloud sync, with an automated 30-second background wipe and instant **[Clear Now]** button.
 - **Power-Loss Resilient Atomic Storage**: Writes data via write-sync-rename (`vault.enc.tmp` ➔ `fsync` ➔ atomic rename) backed by automated rolling backup snapshots (`.bak`).
 - **Emergency Paper Recovery Key**: Generates a 32-character paper recovery code during initial setup to safely restore your vault if you ever lose your Master Password.
 
@@ -40,8 +40,8 @@ For technical details, component breakdown, cryptographic specifications, and th
 
 1. Download the package for your operating system from the [Releases](https://github.com/rituparnaprof/securedstorage/releases) page:
    - **macOS**: `SecuredStorage-macOS.zip`
-   - **Windows**: `SecuredStorage_1.2.0_x64-setup.exe` or standalone portable executable
-   - **Linux**: `secured-storage_1.2.0_amd64.deb` or `.AppImage`
+   - **Windows**: `SecuredStorage_1.3.0_x64-setup.exe` or standalone portable executable
+   - **Linux**: `secured-storage_1.3.0_amd64.deb` or `.AppImage`
 2. Extract or run the installer for your platform.
 3. **Bypassing macOS Gatekeeper (`xattr`)**:
    > [!NOTE]
