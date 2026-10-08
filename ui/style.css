@@ -233,19 +233,19 @@ body.shielded-body {
 }
 
 .lock-badge {
-  font-size: 28px;
+  font-size: 30px;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
 }
 
 .app-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--text-main);
 }
 
 .pqc-tag {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -263,8 +263,8 @@ body.shielded-body {
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: 7px 16px;
+  font-size: 13.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -284,8 +284,8 @@ body.shielded-body {
   color: var(--text-muted);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 7px 12px;
+  font-size: 13.5px;
   outline: none;
   cursor: pointer;
   transition: border-color var(--transition-fast);
@@ -307,28 +307,28 @@ body.shielded-body {
 }
 
 .auth-card {
-  max-width: 480px;
+  max-width: 520px;
   margin: 40px auto;
   background-color: var(--bg-surface-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 36px;
   box-shadow: var(--shadow-card);
 }
 
 .auth-card h2 {
-  font-size: 22px;
+  font-size: 26px;
   margin-bottom: 8px;
   color: var(--text-main);
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-muted);
   margin-bottom: 24px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* Tabs */
@@ -340,12 +340,12 @@ body.shielded-body {
 
 .tab-btn {
   flex: 1;
-  padding: 12px;
+  padding: 13px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -360,17 +360,17 @@ body.shielded-body {
    5. FORM CONTROLS INHERITANCE
    -------------------------------------------------------------------------- */
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .label-row {
@@ -383,7 +383,7 @@ body.shielded-body {
   background: none;
   border: none;
   color: var(--text-link);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -392,12 +392,12 @@ input[type="text"],
 input[type="password"],
 textarea {
   width: 100%;
-  padding: 12px 14px;
+  padding: 13px 16px;
   background-color: var(--bg-input);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-main);
-  font-size: 14px;
+  font-size: 15.5px;
   outline: none;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -412,19 +412,19 @@ textarea:focus {
 
 .helper-text {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
-  margin-top: 4px;
+  margin-top: 5px;
 }
 
 /* --------------------------------------------------------------------------
    6. BUTTON COMPONENT SUITE
    -------------------------------------------------------------------------- */
 .btn {
-  padding: 10px 18px;
+  padding: 12px 22px;
   border-radius: var(--radius-md);
   border: none;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -436,7 +436,7 @@ textarea:focus {
 
 .btn-block {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
 }
 
 .btn-primary {
@@ -474,8 +474,8 @@ textarea:focus {
 }
 
 .btn-svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   stroke-width: 2;
   flex-shrink: 0;
   display: inline-block;
@@ -487,8 +487,8 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
@@ -500,8 +500,8 @@ textarea:focus {
 }
 
 .btn-icon-action svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   stroke-width: 2;
   pointer-events: none;
 }
@@ -564,14 +564,14 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--accent-emerald);
   font-weight: 500;
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: var(--radius-full);
   background-color: var(--accent-emerald);
   box-shadow: 0 0 10px var(--accent-emerald);
@@ -580,8 +580,8 @@ textarea:focus {
 .privacy-notice {
   background-color: rgba(6, 182, 212, 0.1);
   border-left: 3px solid var(--accent-cyan);
-  padding: 10px 14px;
-  font-size: 12px;
+  padding: 12px 16px;
+  font-size: 14.5px;
   color: var(--text-main);
   margin-bottom: 20px;
   border-radius: var(--radius-sm);
@@ -595,18 +595,18 @@ textarea:focus {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .vault-table th {
   text-align: left;
-  padding: 8px 12px;
+  padding: 11px 14px;
   background-color: var(--bg-input);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-size: 11px;
+  font-size: 13px;
   border-bottom: 1px solid var(--border-subtle);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -622,10 +622,10 @@ textarea:focus {
 }
 
 .vault-table td {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-glass);
   vertical-align: middle;
-  height: 38px;
+  height: 46px;
   box-sizing: border-box;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -638,15 +638,15 @@ textarea:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .masked-cell, .masked-text {
   font-family: var(--font-mono);
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--text-dim);
-  opacity: 0.65;
-  font-size: 12px;
+  opacity: 0.7;
+  font-size: 15px;
   line-height: 1;
   user-select: none !important;
 }
@@ -655,17 +655,70 @@ textarea:focus {
   font-family: var(--font-mono);
   color: var(--text-main);
   background-color: rgba(245, 158, 11, 0.15);
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  font-size: 11px;
+  font-size: 14px;
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
-  line-height: 1.3;
+  line-height: 1.35;
+}
+
+/* Cell Flex Layout for Masked Value + Copy Button */
+.cell-content-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.cell-content-wrapper .masked-text,
+.cell-content-wrapper .unmasked-cell,
+.cell-content-wrapper .unmasked-badge {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.btn-cell-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-cell-copy svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.btn-cell-copy:hover {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border-color: rgba(6, 182, 212, 0.35);
+}
+
+.btn-cell-copy.copied {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--accent-emerald);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .actions-cell {
@@ -677,7 +730,7 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
 }
 
 /* --------------------------------------------------------------------------
@@ -705,7 +758,7 @@ textarea:focus {
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
   width: 90%;
-  max-width: 520px;
+  max-width: 560px;
   box-shadow: var(--shadow-card);
 }
 
@@ -713,12 +766,12 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 24px;
+  padding: 20px 28px;
   border-bottom: 1px solid var(--border-glass);
 }
 
 .modal-header h3 {
-  font-size: 18px;
+  font-size: 20px;
   color: var(--text-main);
 }
 
@@ -726,28 +779,29 @@ textarea:focus {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 28px;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 16px 24px;
+  padding: 18px 28px;
   border-top: 1px solid var(--border-glass);
   background-color: rgba(0, 0, 0, 0.15);
 }
 
 .alert-box {
-  padding: 12px;
+  padding: 14px 16px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14.5px;
   margin-bottom: 16px;
+  line-height: 1.5;
 }
 
 .alert-box.error {
@@ -777,7 +831,7 @@ textarea:focus {
 }
 
 .touchid-symbol {
-  font-size: 42px;
+  font-size: 46px;
   margin-bottom: 8px;
   filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.4));
   transition: transform 0.2s ease;
@@ -790,12 +844,12 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 9px 18px;
   background-color: rgba(16, 185, 129, 0.15);
   border: 1px solid var(--accent-emerald);
   color: #6ee7b7;
   border-radius: var(--radius-full);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   margin-bottom: 12px;
 }
@@ -805,16 +859,16 @@ textarea:focus {
   background-color: var(--bg-recovery);
   border: 2px dashed var(--border-recovery);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 18px;
   text-align: center;
   margin: 16px 0;
 }
 
 .recovery-code-text {
   font-family: var(--font-mono);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--text-recovery);
   word-break: break-all;
   user-select: text !important;
@@ -829,8 +883,98 @@ textarea:focus {
   text-align: center;
   padding: 48px;
   color: var(--text-muted);
+  font-size: 16px;
 }
 
 .hidden {
   display: none !important;
 }
+
+/* --------------------------------------------------------------------------
+   9. SECURE EPHEMERAL CLIPBOARD TOAST BANNER
+   -------------------------------------------------------------------------- */
+.clipboard-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--radius-full);
+  padding: 10px 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+  z-index: 999;
+  font-size: 14.5px;
+  color: var(--text-main);
+  animation: slideUpToast 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 90vw;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-icon {
+  font-size: 18px;
+  display: inline-flex;
+}
+
+.toast-message {
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.btn-toast-clear {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: #fda4af;
+  border: 1px solid var(--accent-rose);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-toast-clear:hover {
+  background-color: var(--accent-rose);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+}
+
+[data-theme="light"] .clipboard-toast {
+  background-color: #ffffff;
+  border-color: #0284c7;
+  color: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 0 16px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="light"] .btn-toast-clear {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border-color: #fda4af;
+}
+
+[data-theme="light"] .btn-toast-clear:hover {
+  background-color: #e11d48;
+  color: #ffffff;
+}
+
+@keyframes slideUpToast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+

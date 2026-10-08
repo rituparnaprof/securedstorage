@@ -10,6 +10,7 @@ fn main() {
             .flag("-Wno-unused-parameter")
             .compile("touchid_macos");
         println!("cargo:rustc-link-lib=framework=LocalAuthentication");
+        println!("cargo:rustc-link-lib=framework=AppKit");
     }
 
     tauri_build::build();

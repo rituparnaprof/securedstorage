@@ -7,6 +7,8 @@ const SVG_ICON_EYE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
 const SVG_ICON_EYE_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`;
 const SVG_ICON_EDIT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`;
 const SVG_ICON_DELETE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
+const SVG_ICON_COPY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+const SVG_ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
 // 1. HARDENED ANTI-EXFILTRATION: Intercept and block all copy/cut/selection events
 document.addEventListener('copy', (e) => e.preventDefault());
@@ -150,6 +152,12 @@ async function mockBackendHandler(command, args) {
       notes: '••••••••••••'
     }));
   }
+  if (command === 'copy_credential_field') {
+    return 30; // 30 seconds TTL
+  }
+  if (command === 'clear_clipboard') {
+    return true;
+  }
   if (command === 'lock_vault') return "LOCKED";
   return null;
 }
@@ -159,6 +167,10 @@ let currentEntries = [];
 let unmaskTimers = {};
 let idleTimer = null;
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes inactivity auto-lock
+
+const clipboardToast = document.getElementById('clipboardToast');
+const toastMessage = document.getElementById('toastMessage');
+const toastClearNowBtn = document.getElementById('toastClearNowBtn');
 
 const initScreen = document.getElementById('initScreen');
 const authScreen = document.getElementById('authScreen');
@@ -604,9 +616,83 @@ btnPasswordUnlock.addEventListener('click', async () => {
   }
 });
 
+// Ephemeral Clipboard Countdown & Management
+let clipboardCountdownTimer = null;
+let clipboardRemainingSeconds = 0;
+
+function showClipboardToast(fieldName, ttlSeconds = 30) {
+  if (clipboardCountdownTimer) {
+    clearInterval(clipboardCountdownTimer);
+    clipboardCountdownTimer = null;
+  }
+
+  clipboardRemainingSeconds = ttlSeconds;
+  const label = fieldName === 'password' ? 'Password' : 'Username';
+  if (toastMessage) {
+    toastMessage.textContent = `${label} copied to clipboard. Auto-clearing in ${clipboardRemainingSeconds}s.`;
+  }
+  if (clipboardToast) {
+    clipboardToast.classList.remove('hidden');
+  }
+
+  clipboardCountdownTimer = setInterval(() => {
+    clipboardRemainingSeconds--;
+    if (clipboardRemainingSeconds <= 0) {
+      clearInterval(clipboardCountdownTimer);
+      clipboardCountdownTimer = null;
+      if (toastMessage) toastMessage.textContent = 'Clipboard auto-cleared securely.';
+      setTimeout(() => {
+        if (clipboardToast) clipboardToast.classList.add('hidden');
+      }, 2500);
+    } else {
+      if (toastMessage) {
+        toastMessage.textContent = `${label} copied to clipboard. Auto-clearing in ${clipboardRemainingSeconds}s.`;
+      }
+    }
+  }, 1000);
+}
+
+async function handleClearClipboardNow() {
+  if (clipboardCountdownTimer) {
+    clearInterval(clipboardCountdownTimer);
+    clipboardCountdownTimer = null;
+  }
+  try {
+    await invokeCommand('clear_clipboard');
+  } catch (e) {
+    console.error('[SecuredStorage] Failed to clear clipboard:', e);
+  }
+  if (toastMessage) toastMessage.textContent = 'Clipboard cleared securely.';
+  setTimeout(() => {
+    if (clipboardToast) clipboardToast.classList.add('hidden');
+  }, 1800);
+}
+
+if (toastClearNowBtn) {
+  toastClearNowBtn.addEventListener('click', handleClearClipboardNow);
+}
+
+async function handleCopyCredentialField(entryId, fieldName, btnEl) {
+  try {
+    const ttl = await invokeCommand('copy_credential_field', { entryId, fieldName });
+    // Visual button feedback
+    btnEl.innerHTML = SVG_ICON_CHECK;
+    btnEl.classList.add('copied');
+    setTimeout(() => {
+      btnEl.innerHTML = SVG_ICON_COPY;
+      btnEl.classList.remove('copied');
+    }, 1500);
+
+    showClipboardToast(fieldName, ttl || 30);
+  } catch (err) {
+    console.error('[SecuredStorage] Copy failed:', err);
+  }
+}
+
 // Lock Vault
 async function handleLockVault() {
   clearAllUnmaskTimers();
+  handleClearClipboardNow();
   biometricCanceledByUser = false;
   try {
     await invokeCommand('lock_vault');
@@ -643,22 +729,52 @@ function renderVaultTable(entries) {
     tdWeb.textContent = entry.website || '(No Site)';
     tr.appendChild(tdWeb);
 
-    // Username (Masked)
+    // Username (Masked with Copy button)
     const tdUser = document.createElement('td');
+    const userWrapper = document.createElement('div');
+    userWrapper.className = 'cell-content-wrapper';
+
     const spanUser = document.createElement('span');
     spanUser.id = `cell-user-${entry.id}`;
     spanUser.className = 'masked-text';
     spanUser.textContent = '••••••••••••';
-    tdUser.appendChild(spanUser);
+
+    const btnCopyUser = document.createElement('button');
+    btnCopyUser.className = 'btn-cell-copy';
+    btnCopyUser.title = 'Copy Username to Clipboard (Auto-clearing in 30s)';
+    btnCopyUser.innerHTML = SVG_ICON_COPY;
+    btnCopyUser.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleCopyCredentialField(entry.id, 'username', btnCopyUser);
+    });
+
+    userWrapper.appendChild(spanUser);
+    userWrapper.appendChild(btnCopyUser);
+    tdUser.appendChild(userWrapper);
     tr.appendChild(tdUser);
 
-    // Password (Masked)
+    // Password (Masked with Copy button)
     const tdPass = document.createElement('td');
+    const passWrapper = document.createElement('div');
+    passWrapper.className = 'cell-content-wrapper';
+
     const spanPass = document.createElement('span');
     spanPass.id = `cell-pass-${entry.id}`;
     spanPass.className = 'masked-text';
     spanPass.textContent = '••••••••••••';
-    tdPass.appendChild(spanPass);
+
+    const btnCopyPass = document.createElement('button');
+    btnCopyPass.className = 'btn-cell-copy';
+    btnCopyPass.title = 'Copy Password to Clipboard (Auto-clearing in 30s)';
+    btnCopyPass.innerHTML = SVG_ICON_COPY;
+    btnCopyPass.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleCopyCredentialField(entry.id, 'password', btnCopyPass);
+    });
+
+    passWrapper.appendChild(spanPass);
+    passWrapper.appendChild(btnCopyPass);
+    tdPass.appendChild(passWrapper);
     tr.appendChild(tdPass);
 
     // Notes (Masked)

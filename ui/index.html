@@ -78,11 +78,11 @@
         <div id="displayRecoveryKey" class="recovery-code-text">SEC-0000-0000-0000-0000-0000-0000-0000-0000</div>
       </div>
 
-      <div class="alert-box warning" style="font-size: 0.85rem; line-height: 1.5;">
+      <div class="alert-box warning" style="font-size: 0.98rem; line-height: 1.5;">
         <strong>⚠️ Absolute Zero-Knowledge Warning:</strong> If you forget your Master Password, this paper key is the <u>ONLY</u> way to recover your vault. It is cold and air-gapped; no server or third party can reset it.
       </div>
 
-      <label style="display: flex; align-items: center; gap: 10px; margin: 16px 0; cursor: pointer; font-size: 13px;">
+      <label style="display: flex; align-items: center; gap: 10px; margin: 16px 0; cursor: pointer; font-size: 15px;">
         <input type="checkbox" id="chkSavedRecoveryKey">
         <span>I have physically written down my Emergency Recovery Key.</span>
       </label>
@@ -147,7 +147,7 @@
         <p class="subtitle">Enter your Emergency Paper Recovery Key to unlock and reset your credentials.</p>
         <div class="form-group">
           <label for="recoveryInputKey">Emergency Paper Recovery Key</label>
-          <input type="text" id="recoveryInputKey" placeholder="SEC-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 0.9rem;">
+          <input type="text" id="recoveryInputKey" placeholder="SEC-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-mono); font-size: 1rem;">
         </div>
         <div class="form-group">
           <label for="recoveryNewPassword">New Master Password (min 8 characters)</label>
@@ -185,11 +185,11 @@
         <table class="vault-table">
           <thead>
             <tr>
-              <th style="width: 26%;">Site</th>
-              <th style="width: 23%;">Username</th>
-              <th style="width: 23%;">Password</th>
-              <th style="width: 16%;">Notes</th>
-              <th style="width: 12%; text-align: right; min-width: 105px;">Actions</th>
+              <th style="width: 23%;">Site</th>
+              <th style="width: 24%;">Username</th>
+              <th style="width: 24%;">Password</th>
+              <th style="width: 17%;">Notes</th>
+              <th style="width: 12%; text-align: right; min-width: 110px;">Actions</th>
             </tr>
           </thead>
           <tbody id="vaultTableBody">
@@ -321,10 +321,10 @@
         <button id="closeDeleteAuthBtn" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.5;">
+        <p style="font-size: 0.98rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.5;">
           You are about to permanently delete the credential for <strong id="deleteTargetSite" style="color: var(--text-main);"></strong>.
         </p>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
           To ensure security, please enter your Master Password to authorize this deletion.
         </p>
         <div class="form-group">
@@ -338,6 +338,15 @@
         <button id="confirmDeleteAuthBtn" class="btn btn-danger">Delete Credential</button>
       </div>
     </div>
+  </div>
+
+  <!-- SECURE CLIPBOARD EPHEMERAL TOAST -->
+  <div id="clipboardToast" class="clipboard-toast hidden">
+    <div class="toast-content">
+      <span class="toast-icon">📋</span>
+      <span id="toastMessage" class="toast-message">Password copied to clipboard. Auto-clearing in 30s.</span>
+    </div>
+    <button id="toastClearNowBtn" class="btn-toast-clear">Clear Now</button>
   </div>
 
   <script src="app.js"></script>

@@ -26,6 +26,8 @@ test-vault.enc
 *.pem
 *.pfx
 *.p12
+*.csv
+*.xlsx
 
 # Release artifacts & temporary notes
 RELEASE_NOTES.md

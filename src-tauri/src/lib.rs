@@ -148,6 +148,23 @@ fn lock_vault(session: State<'_, SafeSession>) -> Result<String, String> {
     Ok("Vault locked".to_string())
 }
 
+#[tauri::command]
+fn copy_credential_field(
+    entry_id: String,
+    field_name: String,
+    session: State<'_, SafeSession>,
+) -> Result<u64, String> {
+    let sess = session.lock().map_err(|_| "Failed to lock session".to_string())?;
+    let raw_val = zeroize::Zeroizing::new(reveal_entry_field(&entry_id, &field_name, &sess)?);
+    let ttl = security::copy_to_secure_clipboard(&raw_val)?;
+    Ok(ttl)
+}
+
+#[tauri::command]
+fn clear_clipboard() -> Result<bool, String> {
+    Ok(security::clear_secure_clipboard())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     security::apply_process_hardening();
@@ -172,7 +189,9 @@ pub fn run() {
             get_entry_for_edit,
             update_entry,
             delete_entry,
-            lock_vault
+            lock_vault,
+            copy_credential_field,
+            clear_clipboard
         ])
         .run(tauri::generate_context!())
         .expect("error while running SecuredStorage application");
