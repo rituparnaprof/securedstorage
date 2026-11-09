@@ -204,10 +204,11 @@ body.shielded-body {
   font-family: var(--font-sans);
   background: var(--bg-app);
   color: var(--text-main);
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
   transition: background var(--transition-smooth), color var(--transition-smooth);
 }
 
@@ -218,12 +219,14 @@ body.shielded-body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 28px;
+  padding: 14px 28px;
   background-color: var(--bg-surface-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
   border-bottom: 1px solid var(--border-glass);
   box-shadow: var(--shadow-glass);
+  flex-shrink: 0;
+  z-index: 50;
 }
 
 .logo-group {
@@ -300,15 +303,19 @@ body.shielded-body {
    -------------------------------------------------------------------------- */
 .main-container {
   flex: 1;
-  padding: 32px 28px;
-  max-width: 1200px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 28px;
+  max-width: 1280px;
   margin: 0 auto;
   width: 100%;
 }
 
 .auth-card {
   max-width: 520px;
-  margin: 40px auto;
+  margin: auto;
   background-color: var(--bg-surface-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
@@ -316,6 +323,8 @@ body.shielded-body {
   border-radius: var(--radius-lg);
   padding: 36px;
   box-shadow: var(--shadow-card);
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
 }
 
 .auth-card h2 {
@@ -538,12 +547,17 @@ textarea:focus {
    7. VAULT DATA TABLE & MASKING INHERITANCE
    -------------------------------------------------------------------------- */
 .vault-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background-color: var(--bg-surface-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 20px 24px;
   box-shadow: var(--shadow-card);
 }
 
@@ -551,8 +565,9 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   gap: 16px;
+  flex-shrink: 0;
 }
 
 .search-wrapper {
@@ -567,6 +582,7 @@ textarea:focus {
   font-size: 14px;
   color: var(--accent-emerald);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .status-indicator {
@@ -580,15 +596,40 @@ textarea:focus {
 .privacy-notice {
   background-color: rgba(6, 182, 212, 0.1);
   border-left: 3px solid var(--accent-cyan);
-  padding: 12px 16px;
-  font-size: 14.5px;
+  padding: 10px 16px;
+  font-size: 14px;
   color: var(--text-main);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .table-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+}
+
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
 }
 
 .vault-table {
@@ -598,16 +639,19 @@ textarea:focus {
   font-size: 15px;
 }
 
-.vault-table th {
+.vault-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   text-align: left;
-  padding: 11px 14px;
+  padding: 12px 14px;
   background-color: var(--bg-input);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 13px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 2px solid var(--border-subtle);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -724,6 +768,10 @@ textarea:focus {
 .actions-cell {
   text-align: right;
   white-space: nowrap;
+  min-width: 135px;
+  width: 16%;
+  padding-right: 18px !important;
+  overflow: visible;
 }
 
 .actions-wrapper {
@@ -731,6 +779,7 @@ textarea:focus {
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
+  min-width: 110px;
 }
 
 /* --------------------------------------------------------------------------
@@ -977,4 +1026,209 @@ textarea:focus {
     transform: translate(-50%, 0);
   }
 }
+
+/* --------------------------------------------------------------------------
+   10. APPLICATION HELP MODAL & DOCUMENTATION SYSTEM
+   -------------------------------------------------------------------------- */
+.modal-help-card {
+  max-width: 900px;
+  width: 92%;
+  max-height: 88vh;
+  height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.help-nav-bar {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-glass);
+  background: rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.help-search-box {
+  margin-bottom: 10px;
+}
+
+.help-search-box input {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  width: 100%;
+}
+
+.help-search-box input:focus {
+  border-color: var(--border-focus);
+}
+
+.help-topics-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.help-topics-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.help-pill {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.help-pill:hover,
+.help-pill.active {
+  background: rgba(6, 182, 212, 0.18);
+  border-color: var(--accent-cyan);
+  color: var(--text-main);
+}
+
+.help-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 28px;
+  line-height: 1.65;
+}
+
+.help-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.help-modal-body::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+.help-modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.help-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+.help-section {
+  margin-bottom: 32px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.help-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.help-section h4 {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.help-section p {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.help-callout {
+  background: var(--bg-input);
+  border-left: 3px solid var(--accent-cyan);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.help-callout.warning {
+  background: var(--bg-warning);
+  border-color: var(--border-warning);
+  color: var(--text-warning);
+}
+
+.help-callout.success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--accent-emerald);
+  color: var(--text-main);
+}
+
+.help-callout.info {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: var(--accent-cyan);
+  color: var(--text-main);
+}
+
+.help-step-list {
+  padding-left: 22px;
+  font-size: 14.5px;
+  color: var(--text-muted);
+  margin: 10px 0 14px 0;
+}
+
+.help-step-list li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.help-step-list li strong {
+  color: var(--text-main);
+}
+
+.help-kbd {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-main);
+}
+
+.help-code-path {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-cyan);
+  margin: 3px 0;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+[data-theme="light"] .help-code-path {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0284c7;
+}
+
+[data-theme="light"] .modal-help-card {
+  background: #ffffff;
+}
+
+[data-theme="light"] .help-nav-bar {
+  background: #f8fafc;
+}
+
 

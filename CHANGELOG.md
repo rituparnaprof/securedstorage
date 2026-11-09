@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardware security key (YubiKey / FIDO2 CTAP2) fallback token integration.
 - Encrypted cross-device backup QR pairing protocol (zero-cloud).
 
+## [1.4.0] - 2026-11-09
+
+### Added
+- **Window Resizing & Unclipped Row Action Controls**:
+  - Enlarged default window dimensions to 1180x780 (minimum 900x600) in `tauri.conf.json`.
+  - Expanded the Actions table column width from 12% (110px) to 16% (min 135px) and adjusted relative column percentages (`Site: 21%`, `Username: 23%`, `Password: 23%`, `Notes: 17%`, `Actions: 16%`), preventing the Delete action icon from ever being clipped or hidden on initial launch.
+- **Pinned Application Header & Independent Data Scrolling**:
+  - Restructured layout with a fixed, unscrollable header (`.app-header` pinned at top with `flex-shrink: 0; z-index: 50;`).
+  - Restricted scrolling strictly to the table data viewport (`.table-container` with `overflow-y: auto`), with sticky table column headers (`thead th` at `position: sticky; top: 0`). Header branding, controls, and status indicators remain permanently visible during navigation.
+- **Comprehensive In-App User Manual & Security Guide (Help Section)**:
+  - Added a persistent `❓ Help` button to the application header accessible in all vault states.
+  - Implemented an interactive user manual modal (`#helpModal`) featuring real-time query searching, quick-jump navigation pills, keyboard navigation (`Esc` to dismiss), and complete documentation covering:
+    1. Zero-cloud, air-gapped security and post-quantum cryptography (ML-KEM-1024 + AES-256-GCM).
+    2. First-time vault setup and Emergency Paper Recovery Key safeguarding.
+    3. Three authentication paths: Touch ID / Windows Hello + 6-digit PIN, Master Password, and Emergency Recovery.
+    4. Strict Privacy Mode and ephemeral 10-second credential reveal.
+    5. Native concealed clipboard copying (anti-cloud / anti-history) with 30-second auto-clear and instant `[Clear Now]` flush.
+    6. Master Password-gated editing and permanent deletion.
+    7. Step-by-step cross-MacBook / workstation vault migration (`~/Library/Application Support/SecuredStorage/vault.enc`).
+    8. Hardware anti-surveillance window capture blackout for screen sharing and recordings.
+    9. Inactivity auto-locking (5 minutes) and emergency lock.
+- **Vault Storage Engine Streamlining**:
+  - Direct canonical OS application support path (`~/Library/Application Support/SecuredStorage/vault.enc`), eliminating all legacy Documents directory checks to ensure complete isolation and zero footprint under Documents.
+
 ## [1.3.0] - 2026-10-08
 
 ### Added

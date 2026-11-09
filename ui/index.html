@@ -24,6 +24,10 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 12px;">
+      <button id="helpBtn" class="btn-theme-toggle" title="Application Help & User Guide">
+        <span style="font-size: 14px;">❓</span>
+        <span>Help</span>
+      </button>
       <button id="themeToggleBtn" class="btn-theme-toggle" title="Switch between Light and Dark mode">
         <span id="themeIcon">☀️</span>
         <span id="themeText">Light Mode</span>
@@ -185,11 +189,11 @@
         <table class="vault-table">
           <thead>
             <tr>
-              <th style="width: 23%;">Site</th>
-              <th style="width: 24%;">Username</th>
-              <th style="width: 24%;">Password</th>
+              <th style="width: 21%;">Site</th>
+              <th style="width: 23%;">Username</th>
+              <th style="width: 23%;">Password</th>
               <th style="width: 17%;">Notes</th>
-              <th style="width: 12%; text-align: right; min-width: 110px;">Actions</th>
+              <th style="width: 16%; text-align: right; min-width: 135px;">Actions</th>
             </tr>
           </thead>
           <tbody id="vaultTableBody">
@@ -336,6 +340,202 @@
       <div class="modal-footer">
         <button id="cancelDeleteAuthBtn" class="btn btn-secondary">Cancel</button>
         <button id="confirmDeleteAuthBtn" class="btn btn-danger">Delete Credential</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: APPLICATION USER GUIDE & HELP SYSTEM -->
+  <div id="helpModal" class="modal-backdrop hidden">
+    <div class="modal-card modal-help-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 26px;">📖</span>
+          <div>
+            <h3 style="margin: 0; font-size: 20px;">SecuredStorage User Manual & Documentation</h3>
+            <span style="font-size: 12.5px; color: var(--accent-cyan); font-weight: 600;">PQC-Compliant • Zero-Cloud • Hardware-Bound Security</span>
+          </div>
+        </div>
+        <button id="closeHelpModalBtn" class="close-btn" title="Close Help">&times;</button>
+      </div>
+
+      <div class="help-nav-bar">
+        <div class="help-search-box">
+          <input type="text" id="helpSearchInput" placeholder="🔍 Search help guide (e.g., Touch ID, clipboard, clear now, migration)..." autocomplete="off">
+        </div>
+        <div class="help-topics-nav" id="helpTopicsNav">
+          <button class="help-pill active" data-topic="all">All Topics</button>
+          <button class="help-pill" data-topic="overview">1. Overview</button>
+          <button class="help-pill" data-topic="setup">2. First-Time Setup</button>
+          <button class="help-pill" data-topic="unlock">3. Unlocking</button>
+          <button class="help-pill" data-topic="privacy">4. Strict Privacy & Reveal</button>
+          <button class="help-pill" data-topic="clipboard">5. Secure Clipboard</button>
+          <button class="help-pill" data-topic="manage">6. Manage Credentials</button>
+          <button class="help-pill" data-topic="migration">7. Vault Migration</button>
+          <button class="help-pill" data-topic="shielding">8. Screen Shielding</button>
+          <button class="help-pill" data-topic="faq">9. FAQ & Security</button>
+        </div>
+      </div>
+
+      <div class="modal-body help-modal-body" id="helpContentBody">
+
+        <!-- SECTION 1: OVERVIEW -->
+        <article class="help-section" data-section="overview">
+          <h4>🛡️ 1. Overview & Security Architecture</h4>
+          <p>
+            SecuredStorage is a hardened, zero-cloud, post-quantum cryptography (PQC) offline password vault designed for complete local sovereignty over your credentials.
+          </p>
+          <div class="help-callout info">
+            <strong>Key Security Guarantees:</strong>
+            <ul class="help-step-list" style="margin-top: 6px; margin-bottom: 0;">
+              <li><strong>Zero Cloud Dependency:</strong> No telemetry, no background sync, no remote servers, and zero internet transmission.</li>
+              <li><strong>Post-Quantum Cryptography:</strong> Hybrid ML-KEM-1024 (CRYSTALS-Kyber) lattice key encapsulation paired with AES-256-GCM authenticated encryption.</li>
+              <li><strong>RAM-Only Residency:</strong> Decrypted secrets are kept in volatile memory only while unlocked and wiped to zero bytes immediately on lock.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- SECTION 2: FIRST-TIME SETUP -->
+        <article class="help-section" data-section="setup">
+          <h4>🚀 2. First-Time Vault Initialization</h4>
+          <p>
+            When you launch SecuredStorage for the first time, you will be prompted to create your new encrypted vault:
+          </p>
+          <ol class="help-step-list">
+            <li><strong>Master Password:</strong> Choose a strong, high-entropy password (minimum 8 characters, recommended 16+ characters).</li>
+            <li><strong>6-Digit Hardware PIN:</strong> Choose a numeric PIN (e.g. <code>123456</code>). This PIN works in tandem with Mac Touch ID or Windows Hello for instant two-step unlocking.</li>
+            <li><strong>Emergency Paper Recovery Key:</strong> Upon creating your vault, you will receive a unique 32-character recovery key (e.g. <code>SEC-XXXX-XXXX-XXXX-...</code>).</li>
+          </ol>
+          <div class="help-callout warning">
+            <strong>⚠️ Absolute Zero-Knowledge Warning:</strong>
+            Physically write down your Emergency Paper Recovery Key on paper and keep it in a secure lockbox or safe. Because SecuredStorage does not use cloud servers, there is NO "Forgot Password" email or remote reset. If you lose your Master Password, this paper key is the only way to recover your data.
+          </div>
+        </article>
+
+        <!-- SECTION 3: UNLOCKING -->
+        <article class="help-section" data-section="unlock">
+          <h4>🔑 3. Unlocking Your Vault (3 Authentication Paths)</h4>
+          <p>
+            SecuredStorage provides three distinct ways to unlock your database:
+          </p>
+          <ol class="help-step-list">
+            <li>
+              <strong>Touch ID / Biometrics + 6-Digit PIN (Default Fast Unlock):</strong><br>
+              Click <em>Scan Touch ID</em> and place your registered finger on your Mac Touch ID sensor (or Windows Hello scanner). Once biometrics pass, enter your 6-digit hardware PIN. This two-step local factor securely decrypts your vault key.
+            </li>
+            <li>
+              <strong>Master Password:</strong><br>
+              Switch to the <em>Master Password</em> tab to unlock directly using your full passphrase without needing biometric sensors.
+            </li>
+            <li>
+              <strong>Emergency Paper Recovery:</strong><br>
+              If you ever forget your Master Password, switch to the <em>Emergency Recovery</em> tab. Enter your 32-character paper recovery key, and you will be prompted to set a new Master Password and PIN to restore full access.
+            </li>
+          </ol>
+        </article>
+
+        <!-- SECTION 4: STRICT PRIVACY & REVEAL -->
+        <article class="help-section" data-section="privacy">
+          <h4>👁️ 4. Strict Privacy Mode & Ephemeral 10-Second Reveal</h4>
+          <p>
+            To protect your secrets from shoulder-surfing in public environments (cafes, offices, coworking spaces):
+          </p>
+          <ul class="help-step-list">
+            <li><strong>Default Masked View:</strong> When the vault unlocks, only the <strong>Site</strong> identifier is visible in plain text. Usernames, passwords, and sensitive notes are completely masked as <code>••••••••••••</code>.</li>
+            <li><strong>10-Second Reveal (👁️):</strong> Click the Eye icon on any row to temporarily reveal that specific credential. An amber countdown badge displays the remaining time.</li>
+            <li><strong>Automatic Re-Masking:</strong> After exactly 10 seconds, the row automatically re-masks itself. You can also click the Eye icon again anytime to manually re-mask immediately.</li>
+          </ul>
+        </article>
+
+        <!-- SECTION 5: SECURE CLIPBOARD -->
+        <article class="help-section" data-section="clipboard">
+          <h4>📋 5. Secure Clipboard Copying & Concealed Memory Protection</h4>
+          <p>
+            SecuredStorage includes native protections designed specifically to prevent credential leaks through the system clipboard:
+          </p>
+          <div class="help-callout success">
+            <strong>Concealed Pasteboard (Anti-Cloud & Anti-History):</strong>
+            <ul class="help-step-list" style="margin-top: 6px; margin-bottom: 0;">
+              <li><strong>No iCloud Sync:</strong> Writes using native macOS concealed pasteboard markers (<code>org.nspasteboard.ConcealedType</code>). Apple iCloud Universal Clipboard is blocked from syncing your password to your other devices over Wi-Fi or Bluetooth.</li>
+              <li><strong>Excluded from Clipboard Managers:</strong> Third-party clipboard history utilities (Alfred, Maccy, Raycast, Paste, CleanShot) are instructed not to capture or record your copied credentials.</li>
+            </ul>
+          </div>
+          <p>
+            <strong>Ephemeral Auto-Clearing Banner & Instant Flush:</strong>
+          </p>
+          <div class="help-callout info">
+            <p style="margin-bottom: 6px;">
+              When you click the copy icon (📋) next to any username or password, a banner appears at the bottom:
+            </p>
+            <p style="font-style: italic; margin-bottom: 8px;">
+              "Password copied to clipboard. Auto-clearing in 30s. <strong style="color: var(--accent-rose); border: 1px solid var(--accent-rose); padding: 1px 6px; border-radius: 4px;">[Clear Now]</strong>"
+            </p>
+            <p style="margin-bottom: 0;">
+              If you paste the password into your browser or login form within 3 seconds, you can click <strong>[Clear Now]</strong> to immediately flush the clipboard to empty bytes without waiting for the 30-second countdown to expire.
+            </p>
+          </div>
+        </article>
+
+        <!-- SECTION 6: MANAGE CREDENTIALS -->
+        <article class="help-section" data-section="manage">
+          <h4>✏️ 6. Adding, Editing & Deleting Credentials</h4>
+          <ul class="help-step-list">
+            <li>
+              <strong>Adding Credentials:</strong> Click the <strong>+ Add Credential</strong> button in the top header. Provide the Site identifier, Username, Password, and optional Notes. Click <em>"Generate Strong"</em> to generate a 20-character cryptographically secure password with mixed cases, numbers, and symbols.
+            </li>
+            <li>
+              <strong>Editing Credentials (✏️):</strong> Click the pencil icon on any row. For security, editing requires entering your <strong>Master Password</strong> to authenticate the action.
+            </li>
+            <li>
+              <strong>Deleting Credentials (🗑️):</strong> Click the trash icon on any row. Deleting permanently removes the record and requires entering your <strong>Master Password</strong> to confirm authorization.
+            </li>
+          </ul>
+        </article>
+
+        <!-- SECTION 7: VAULT MIGRATION -->
+        <article class="help-section" data-section="migration">
+          <h4>💻 7. Moving Your Vault to Another MacBook</h4>
+          <p>
+            Because SecuredStorage is completely offline and file-based, you have 100% data portability. Your encrypted vault is stored in your operating system's standard application support directory:
+          </p>
+          <p>
+            <span class="help-code-path">~/Library/Application Support/SecuredStorage/vault.enc</span>
+          </p>
+          <ol class="help-step-list">
+            <li><strong>Locate Vault File:</strong> On your current Mac, open Finder, press <kbd class="help-kbd">Cmd + Shift + G</kbd>, paste <code>~/Library/Application Support/SecuredStorage/</code>, and copy <code>vault.enc</code> to an encrypted USB flash drive or AirDrop it.</li>
+            <li><strong>Install SecuredStorage:</strong> Install and launch SecuredStorage on your new MacBook (or create the directory <code>~/Library/Application Support/SecuredStorage/</code>).</li>
+            <li><strong>Paste Vault File:</strong> Place your <code>vault.enc</code> file into <code>~/Library/Application Support/SecuredStorage/</code> on the new Mac.</li>
+            <li><strong>Launch & Unlock:</strong> Open SecuredStorage on the new Mac. It will automatically detect your existing encrypted vault and prompt you to unlock with your Master Password or Emergency Paper Recovery Key!</li>
+          </ol>
+        </article>
+
+        <!-- SECTION 8: SCREEN SHIELDING -->
+        <article class="help-section" data-section="shielding">
+          <h4>🛑 8. Anti-Surveillance Window Shielding</h4>
+          <p>
+            SecuredStorage activates hardware-level window capture protection directly with the macOS window server.
+          </p>
+          <div class="help-callout success">
+            <strong>Screen Recording & Screenshot Blackout:</strong>
+            Whenever screen sharing or recording applications (such as Zoom, Google Meet, Microsoft Teams, Slack huddles, OBS Studio, or QuickTime screen capture) attempt to capture the screen, the SecuredStorage window is rendered completely black in the capture stream, preventing accidental leakage during meetings or presentations.
+          </div>
+        </article>
+
+        <!-- SECTION 9: FAQ & SECURITY -->
+        <article class="help-section" data-section="faq">
+          <h4>💡 9. FAQ, Shortcuts & Session Inactivity</h4>
+          <ul class="help-step-list">
+            <li><strong>Auto-Lock on Inactivity:</strong> SecuredStorage automatically locks itself after <strong>5 minutes of inactivity</strong>, immediately clearing all decrypted keys and memory.</li>
+            <li><strong>Instant Lock:</strong> Click the red <strong>Lock Vault</strong> button in the header at any time to instantly lock.</li>
+            <li><strong>Keyboard Shortcut:</strong> Press <kbd class="help-kbd">Esc</kbd> at any time to close any open modal dialog or this Help guide.</li>
+            <li><strong>Search:</strong> Use the search bar above the table to instantly filter credentials by Site name in real time.</li>
+          </ul>
+        </article>
+
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+        <span style="font-size: 13px; color: var(--text-dim);">Tip: Press <kbd class="help-kbd">Esc</kbd> to return to your vault anytime.</span>
+        <button id="closeHelpModalBottomBtn" class="btn btn-primary">Close Guide</button>
       </div>
     </div>
   </div>

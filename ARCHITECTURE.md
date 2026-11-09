@@ -235,7 +235,6 @@ To avoid polluting personal documents, eliminate OS permission prompts, and guar
 1. **Pre-Save Snapshot (`vault.enc.bak`)**: Before committing modifications, an immediate copy is taken to guarantee rollback capability.
 2. **Write-Sync-Rename (`vault.enc.tmp`)**: Encrypted bytes are written to a temporary file, flushed directly to physical storage with `File::sync_all()`, and atomically renamed over `vault.enc`. If power is lost mid-write, data integrity is never compromised.
 3. **Automated Recovery**: If `vault.enc` is missing or corrupted, the system automatically detects, restores, and verifies the `.bak` snapshot.
-4. **Seamless Migration**: Upon launch, if a vault is missing from the canonical directory, SecuredStorage automatically scans for legacy vaults in `~/Documents/SecuredStorage/` and migrates them forward without user intervention.
 
 ---
 

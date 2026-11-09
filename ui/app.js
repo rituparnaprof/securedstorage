@@ -263,6 +263,15 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 const themeIcon = document.getElementById('themeIcon');
 const themeText = document.getElementById('themeText');
 
+// Help Modal Elements
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const closeHelpModalBtn = document.getElementById('closeHelpModalBtn');
+const closeHelpModalBottomBtn = document.getElementById('closeHelpModalBottomBtn');
+const helpSearchInput = document.getElementById('helpSearchInput');
+const helpTopicsNav = document.getElementById('helpTopicsNav');
+const helpContentBody = document.getElementById('helpContentBody');
+
 // Theme Management: Light / Dark Mode with System Preference Fallback
 function setupTheme() {
   const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -1129,9 +1138,102 @@ if (deleteAuthPassword) {
   });
 }
 
+// Help Modal Interactions & Search Navigation
+function openHelpModal() {
+  if (helpModal) {
+    helpModal.classList.remove('hidden');
+    if (helpSearchInput) {
+      helpSearchInput.value = '';
+      filterHelpSections('');
+      helpSearchInput.focus();
+    }
+    // Reset active topic pill to 'all'
+    if (helpTopicsNav) {
+      helpTopicsNav.querySelectorAll('.help-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.topic === 'all');
+      });
+    }
+    if (helpContentBody) {
+      helpContentBody.scrollTop = 0;
+    }
+  }
+}
+
+function closeHelpModal() {
+  if (helpModal) {
+    helpModal.classList.add('hidden');
+  }
+}
+
+function filterHelpSections(query) {
+  if (!helpContentBody) return;
+  const sections = helpContentBody.querySelectorAll('.help-section');
+  const normalizedQuery = (query || '').trim().toLowerCase();
+
+  sections.forEach(section => {
+    if (!normalizedQuery) {
+      section.classList.remove('hidden');
+    } else {
+      const text = section.textContent.toLowerCase();
+      if (text.includes(normalizedQuery)) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    }
+  });
+}
+
+function scrollToHelpTopic(topic) {
+  if (!helpContentBody) return;
+  const sections = helpContentBody.querySelectorAll('.help-section');
+
+  if (topic === 'all') {
+    sections.forEach(s => s.classList.remove('hidden'));
+    helpContentBody.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  const target = helpContentBody.querySelector(`.help-section[data-section="${topic}"]`);
+  if (target) {
+    target.classList.remove('hidden');
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+if (helpBtn) helpBtn.addEventListener('click', openHelpModal);
+if (closeHelpModalBtn) closeHelpModalBtn.addEventListener('click', closeHelpModal);
+if (closeHelpModalBottomBtn) closeHelpModalBottomBtn.addEventListener('click', closeHelpModal);
+if (helpModal) {
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) closeHelpModal();
+  });
+}
+
+if (helpSearchInput) {
+  helpSearchInput.addEventListener('input', (e) => {
+    filterHelpSections(e.target.value);
+  });
+}
+
+if (helpTopicsNav) {
+  helpTopicsNav.addEventListener('click', (e) => {
+    const pill = e.target.closest('.help-pill');
+    if (!pill) return;
+    const topic = pill.dataset.topic;
+    helpTopicsNav.querySelectorAll('.help-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    scrollToHelpTopic(topic);
+  });
+}
+
 // Global Modal Escape key listener
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    if (helpModal && !helpModal.classList.contains('hidden')) {
+      helpModal.classList.add('hidden');
+      return;
+    }
     if (addModal && !addModal.classList.contains('hidden')) addModal.classList.add('hidden');
     if (editAuthModal && !editAuthModal.classList.contains('hidden')) editAuthModal.classList.add('hidden');
     if (editModal && !editModal.classList.contains('hidden')) editModal.classList.add('hidden');

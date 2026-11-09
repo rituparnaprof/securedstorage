@@ -123,31 +123,9 @@ pub fn get_vault_dir() -> PathBuf {
     dir
 }
 
-/// Primary storage path for `vault.enc` with automatic backward-compatible migration.
+/// Primary storage path for `vault.enc`.
 pub fn get_vault_path() -> PathBuf {
-    let dir = get_vault_dir();
-    let modern_path = dir.join("vault.enc");
-
-    // Seamless Legacy Migration:
-    // If modern path doesn't exist yet, check if a legacy vault exists in ~/Documents/SecuredStorage/vault.enc
-    if !modern_path.exists() {
-        if let Some(mut doc_dir) = dirs::document_dir() {
-            doc_dir.push("SecuredStorage");
-            let legacy_path = doc_dir.join("vault.enc");
-            if legacy_path.exists() {
-                // Copy legacy vault to canonical application support directory
-                if fs::copy(&legacy_path, &modern_path).is_ok() {
-                    let legacy_bak = doc_dir.join("vault.enc.bak");
-                    if legacy_bak.exists() {
-                        let _ = fs::copy(&legacy_bak, dir.join("vault.enc.bak"));
-                    }
-                    let _ = fs::remove_file(&legacy_path);
-                }
-            }
-        }
-    }
-
-    modern_path
+    get_vault_dir().join("vault.enc")
 }
 
 /// Rolling backup path for power-loss and corruption rollback: `vault.enc.bak`
