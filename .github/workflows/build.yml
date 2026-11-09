@@ -47,6 +47,7 @@ jobs:
 
       - name: Build Tauri Binary
         working-directory: ./src-tauri
+        shell: bash
         env:
           APPIMAGE_EXTRACT_AND_RUN: 1
         run: |
