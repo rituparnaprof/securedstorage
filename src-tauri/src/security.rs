@@ -160,10 +160,10 @@ pub fn clear_secure_clipboard() -> bool {
     clear_secure_clipboard_internal(-1)
 }
 
-fn clear_secure_clipboard_internal(expected_change_id: i64) -> bool {
+fn clear_secure_clipboard_internal(_expected_change_id: i64) -> bool {
     #[cfg(target_os = "macos")]
     {
-        let res = unsafe { clear_macos_pasteboard_if_matches(expected_change_id as libc::c_long) };
+        let res = unsafe { clear_macos_pasteboard_if_matches(_expected_change_id as libc::c_long) };
         res == 1
     }
 
